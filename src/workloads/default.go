@@ -8,6 +8,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"bytes"
+	"time"
 
 	"databases"
 )
@@ -46,8 +47,8 @@ func GenerateNewKey(current_records int64) string {
 }
 
 
-func GenerateExistingKey(current_records, current_operations int64) string {
-	rand.Seed(current_operations)
+func GenerateExistingKey(current_records int64) string {
+	rand.Seed(time.Now().UnixNano())
 	rand_record := rand.Int63n(current_records)
 	str_rand_record := strconv.FormatInt(rand_record, 10)
 	return hash(str_rand_record)
@@ -118,14 +119,14 @@ func DoBatch(db databases.Database, config Config, state *State) {
 			value = GenerateValue(key, config.IndexableFields, config.ValueSize)
 			status = db.Create(key, value)
 		case "r":
-			key = GenerateExistingKey(state.Records, state.Operations)
+			key = GenerateExistingKey(state.Records)
 			status = db.Read(key)
 		case "u":
-			key = GenerateExistingKey(state.Records, state.Operations)
+			key = GenerateExistingKey(state.Records)
 			value = GenerateValue(key, config.IndexableFields, config.ValueSize)
 			status = db.Update(key, value)
 		case "d":
-			key = GenerateExistingKey(state.Records, state.Operations)
+			key = GenerateExistingKey(state.Records)
 			status = db.Delete(key)
 		}
 		if status != nil {
