@@ -31,6 +31,7 @@ type Config struct {
 type State struct {
 	Operations, Records int64
 	Errors []string
+	Events map[string]time.Time
 }
 
 
