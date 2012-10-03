@@ -59,6 +59,6 @@ func (mongo *MongoDB) Delete(key string) error {
 }
 
 
-func (mongo *MongoDB) Query(key string, value map[string]interface{}) error {
+func (mongo *MongoDB) Query(key string, limit int) error {
 	return nil  // TODO: implement queries on secondary indexes
 }

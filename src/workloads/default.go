@@ -141,6 +141,9 @@ func DoBatch(db databases.Database, config Config, state *State) {
 		case "d":
 			key = GenerateExistingKey(state.Records)
 			status = db.Delete(key)
+		case "q":
+			key = GenerateExistingKey(state.Records)
+			status = db.Query(key, 10)
 		}
 		if status != nil {
 			state.Errors[v] ++

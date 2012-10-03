@@ -23,5 +23,5 @@ type Database interface {
 
 	Delete(key string) error
 
-	Query(key string, value map[string]interface{}) error
+	Query(key string, limit int) error
 }
