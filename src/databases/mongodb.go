@@ -15,7 +15,11 @@ type MongoDB struct {
 
 func (mongo *MongoDB) Init(config Config) {
 	var err error
-	mongo.Session, err = mgo.Dial(config.Addresses[0])  // TODO: use multiple addresses as connection pool
+	var pool string = ""
+	for _, address := range config.Addresses {
+		pool += address + ","
+	}
+	mongo.Session, err = mgo.Dial(pool)
 	if err != nil {
 		panic(err)
 	}
