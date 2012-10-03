@@ -14,13 +14,13 @@ import (
 // TODO: report latency stats
 func report_throughput(config workloads.Config, state *workloads.State, wg *sync.WaitGroup) {
 	var ops_done int64 = 0
-	var samples int = 0
+	var samples int = 1
 	for state.Operations < config.Operations {
 		time.Sleep(10 * time.Second)
 		throughput := (state.Operations - ops_done) / 10
 		ops_done = state.Operations
-		fmt.Printf("%v - %v seconds: %v ops/sec; total operations: %v\n",
-			samples * 10, samples * 10 + 10,throughput, ops_done)
+		fmt.Printf("%6v seconds: %10v ops/sec; total operations: %v\n",
+			samples * 10, throughput, ops_done)
 		samples ++
 	}
 	wg.Done()
