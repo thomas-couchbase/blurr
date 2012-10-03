@@ -73,11 +73,11 @@ func (workload *DefaultWorkload) GenerateValue(key string, indexableFields, size
 }
 
 
-func (workload *DefaultWorkload) GenerateQuery(indexableFields int, currentRecords int64) (fieldName, fieldValue string, limit int) {
+func (workload *DefaultWorkload) GenerateQuery(indexableFields int, currentRecords int64) (string, string, int) {
 	i := rand.Intn(indexableFields)
-	fieldName = "field" + strconv.Itoa(i)
-	fieldValue = fieldName + "-" + workload.GenerateExistingKey(currentRecords)[i:i + 10]
-	limit = 10 + rand.Intn(10)
+	fieldName := "field" + strconv.Itoa(i)
+	fieldValue := fieldName + "-" + workload.GenerateExistingKey(currentRecords)[i:i + 10]
+	limit := 10 + rand.Intn(10)
 	return fieldName, fieldValue, limit
 }
 
