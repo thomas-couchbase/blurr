@@ -60,5 +60,7 @@ func (mongo *MongoDB) Delete(key string) error {
 
 
 func (mongo *MongoDB) Query(key string, limit int) error {
-	return nil  // TODO: implement queries on secondary indexes
+	result := map[string]interface{}{}
+	err := mongo.Collection.Find(bson.M{"_id": bson.M{"$gte": key}}).Limit(limit).All(&result)
+	return err
 }
