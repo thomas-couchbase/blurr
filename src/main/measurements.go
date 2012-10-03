@@ -19,8 +19,8 @@ func report_throughput(config workloads.Config, state *workloads.State, wg *sync
 		time.Sleep(10 * time.Second)
 		throughput := (state.Operations - ops_done) / 10
 		ops_done = state.Operations
-		fmt.Printf("%6v seconds: %10v ops/sec; total operations: %v\n",
-			samples * 10, throughput, ops_done)
+		fmt.Printf("%6v seconds: %10v ops/sec; total operations: %v; total errors: %v\n",
+			samples * 10, throughput, ops_done, state.Errors["total"])
 		samples ++
 	}
 	wg.Done()
@@ -30,6 +30,14 @@ func report_throughput(config workloads.Config, state *workloads.State, wg *sync
 // Report final summary: errors and elapsed time
 // TODO: report latency histogram
 func report_summary(state *workloads.State) {
-	fmt.Printf("Total errors: %v\n", len(state.Errors))  // TODO: report errors by type
-	fmt.Printf("Time elapsed: %v\n", state.Events["Finished"].Sub(state.Events["Started"]))
+	if len(state.Errors) > 0 {
+		fmt.Println("Errors:")
+		fmt.Printf("\tCreate : %v\n", state.Errors["c"])
+		fmt.Printf("\tRead   : %v\n", state.Errors["r"])
+		fmt.Printf("\tUpdate : %v\n", state.Errors["u"])
+		fmt.Printf("\tDelete : %v\n", state.Errors["d"])
+		fmt.Printf("\tQuery  : %v\n", state.Errors["q"])
+		fmt.Printf("\tTotal  : %v\n", state.Errors["total"])
+	}
+	fmt.Printf("Time elapsed:\n\t%v\n", state.Events["Finished"].Sub(state.Events["Started"]))
 }

@@ -35,6 +35,7 @@ func main() {
 	state.Records = config.Workload.Records
 
 	// Initialize benchmark events
+	state.Errors = make(map[string]int)
 	state.Events = make(map[string]time.Time)
 	state.Events["Started"] = time.Now()
 

@@ -34,7 +34,7 @@ type Config struct {
 // Type to store benchmark state
 type State struct {
 	Operations, Records int64    // operations done and total number of records in database
-	Errors []string              // total errors by operation type
+	Errors map[string]int        // total errors by operation type
 	Events map[string]time.Time  // runtime events ("Started", "Finished", and etc.)
 }
 
@@ -143,7 +143,8 @@ func DoBatch(db databases.Database, config Config, state *State) {
 			status = db.Delete(key)
 		}
 		if status != nil {
-			state.Errors = append(state.Errors, v)
+			state.Errors[v] ++
+			state.Errors["total"] ++
 		}
 	}
 }
