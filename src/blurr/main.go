@@ -46,7 +46,7 @@ func main() {
 	}
 	// Continuously report performance stats
 	wgStats.Add(1)
-	go ReportThroughput(config.Workload, state, wgStats)
+	go state.ReportThroughput(config.Workload, wgStats)
 
 	wg.Wait()
 	state.Events["Finished"] = time.Now()
@@ -54,5 +54,5 @@ func main() {
 
 	// Close active connections (if any) and report final summary
 	database.Shutdown()
-	ReportSummary(state)
+	state.ReportSummary()
 }

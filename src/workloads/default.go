@@ -31,14 +31,6 @@ type Config struct {
 }
 
 
-// Type to store benchmark state
-type State struct {
-	Operations, Records int64    // operations done and total number of records in database
-	Errors map[string]int        // total errors by operation type
-	Events map[string]time.Time  // runtime events ("Started", "Finished", and etc.)
-}
-
-
 // Generate hexdecimal representation of md5 hash for string
 func Hash(inString string) string {
 	h := md5.New()

@@ -1,18 +1,24 @@
-package main
+package workloads
 
 
 import (
 	"fmt"
 	"time"
 	"sync"
-
-	"workloads"
 )
+
+
+// Type to store benchmark state
+type State struct {
+	Operations, Records int64    // operations done and total number of records in database
+	Errors map[string]int        // total errors by operation type
+	Events map[string]time.Time  // runtime events ("Started", "Finished", and etc.)
+}
 
 
 // Report average throughput and overall progress every 10 seconds
 // TODO: report latency stats
-func ReportThroughput(config workloads.Config, state *workloads.State, wg *sync.WaitGroup) {
+func (state *State) ReportThroughput(config Config, wg *sync.WaitGroup) {
 	var opsDone int64 = 0
 	var samples int = 1
 	for state.Operations < config.Operations {
@@ -20,7 +26,7 @@ func ReportThroughput(config workloads.Config, state *workloads.State, wg *sync.
 		throughput := (state.Operations - opsDone) / 10
 		opsDone = state.Operations
 		fmt.Printf("%6v seconds: %10v ops/sec; total operations: %v; total errors: %v\n",
-			samples * 10, throughput, opsDone, state.Errors["total"])
+				samples * 10, throughput, opsDone, state.Errors["total"])
 		samples ++
 	}
 	wg.Done()
@@ -29,7 +35,7 @@ func ReportThroughput(config workloads.Config, state *workloads.State, wg *sync.
 
 // Report final summary: errors and elapsed time
 // TODO: report latency histogram
-func ReportSummary(state *workloads.State) {
+func (state *State) ReportSummary() {
 	if len(state.Errors) > 0 {
 		fmt.Println("Errors:")
 		fmt.Printf("\tCreate : %v\n", state.Errors["c"])
