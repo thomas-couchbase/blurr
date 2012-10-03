@@ -6,8 +6,6 @@ import (
 	"math"
 	"math/rand"
 	"strconv"
-	"crypto/md5"
-	"encoding/hex"
 	"bytes"
 	"time"
 
@@ -15,39 +13,25 @@ import (
 )
 
 
-// General workload configuration
-type Config struct {
-	CreatePercentage int  // shorthand "c"
-	ReadPercentage int    // shorthand "r"
-	UpdatePercentage int  // shorthand "u"
-	DeletePercentage int  // shorthand "d"
-	QueryPercentage int   // shorthand "q"
-	Records int64
-	Operations int64
-	ValueSize int
-	IndexableFields int
-	Workers int
-	TargetThroughput int
+type DefaultWorkload struct {
+	Config Config
 }
 
 
-// Generate hexdecimal representation of md5 hash for string
-func Hash(inString string) string {
-	h := md5.New()
-	h.Write([]byte(inString))
-	return hex.EncodeToString(h.Sum(nil))
+func (workload *DefaultWorkload) Init(config Config) {
+	workload.Config = config
 }
 
 
 // Generate new *unique* key
-func GenerateNewKey(currentRecords int64) string {
+func (workload *DefaultWorkload) GenerateNewKey(currentRecords int64) string {
 	strCurrentRecords := strconv.FormatInt(currentRecords, 10)
 	return Hash(strCurrentRecords)
 }
 
 
 // Generate random key from current key space
-func GenerateExistingKey(currentRecords int64) string {
+func (workload *DefaultWorkload) GenerateExistingKey(currentRecords int64) string {
 	rand.Seed(time.Now().UnixNano())
 	randRecord := rand.Int63n(currentRecords)
 	strRandRecord := strconv.FormatInt(randRecord, 10)
@@ -56,7 +40,7 @@ func GenerateExistingKey(currentRecords int64) string {
 
 
 // Generate value with deterministic indexable fields and arbitrary body
-func GenerateValue(key string, indexableFields, size int) map[string]interface{} {
+func (workload *DefaultWorkload) GenerateValue(key string, indexableFields, size int) map[string]interface{} {
 	// Hex lengh is 32 characters, so only 22 indexable fields are allowed
 	if indexableFields >= 20 {
 		panic("Too much fields! It must be less than 20")
@@ -80,32 +64,32 @@ func GenerateValue(key string, indexableFields, size int) map[string]interface{}
 }
 
 
-func GenerateQuery(indexableFields int, currentRecords int64) (fieldName, fieldValue string, limit int) {
+func (workload *DefaultWorkload) GenerateQuery(indexableFields int, currentRecords int64) (fieldName, fieldValue string, limit int) {
 	i := rand.Intn(indexableFields)
 	fieldName = "field" + strconv.Itoa(i)
-	fieldValue = fieldName + "-" + GenerateExistingKey(currentRecords)[i:i + 10]
+	fieldValue = fieldName + "-" + workload.GenerateExistingKey(currentRecords)[i:i + 10]
 	limit = 10 + rand.Intn(10)
 	return fieldName, fieldValue, limit
 }
 
 
 // Generate slice of shuffled characters (CRUD-Q shorthands)
-func PrepareBatch(config Config) []string {
+func (workload *DefaultWorkload) PrepareBatch() []string {
 	operations := make([]string, 0, 100)
 	randOperations := make([]string, 100, 100)
-	for i := 0; i < config.CreatePercentage; i++ {
+	for i := 0; i < workload.Config.CreatePercentage; i++ {
 		operations = append(operations, "c")
 	}
-	for i := 0; i < config.ReadPercentage; i++ {
+	for i := 0; i < workload.Config.ReadPercentage; i++ {
 		operations = append(operations, "r")
 	}
-	for i := 0; i < config.UpdatePercentage; i++ {
+	for i := 0; i < workload.Config.UpdatePercentage; i++ {
 		operations = append(operations, "u")
 	}
-	for i := 0; i < config.DeletePercentage; i++ {
+	for i := 0; i < workload.Config.DeletePercentage; i++ {
 		operations = append(operations, "d")
 	}
-	for i := 0; i < config.QueryPercentage; i++ {
+	for i := 0; i < workload.Config.QueryPercentage; i++ {
 		operations = append(operations, "q")
 	}
 	if len(operations) != 100 {
@@ -119,31 +103,31 @@ func PrepareBatch(config Config) []string {
 
 
 // Sequentially send 100 requests
-func DoBatch(db databases.Database, config Config, state *State) {
+func (workload *DefaultWorkload) DoBatch(db databases.Database, state *State) {
 	var key string
 	var value map[string]interface{}
 	var status error
-	var batch = PrepareBatch(config)
+	var batch = workload.PrepareBatch()
 
 	for _, v := range batch {
 		switch v {
 		case "c":
 			state.Records ++
-			key = GenerateNewKey(state.Records)
-			value = GenerateValue(key, config.IndexableFields, config.ValueSize)
+			key = workload.GenerateNewKey(state.Records)
+			value = workload.GenerateValue(key, workload.Config.IndexableFields, workload.Config.ValueSize)
 			status = db.Create(key, value)
 		case "r":
-			key = GenerateExistingKey(state.Records)
+			key = workload.GenerateExistingKey(state.Records)
 			status = db.Read(key)
 		case "u":
-			key = GenerateExistingKey(state.Records)
-			value = GenerateValue(key, config.IndexableFields, config.ValueSize)
+			key = workload.GenerateExistingKey(state.Records)
+			value = workload.GenerateValue(key, workload.Config.IndexableFields, workload.Config.ValueSize)
 			status = db.Update(key, value)
 		case "d":
-			key = GenerateExistingKey(state.Records)
+			key = workload.GenerateExistingKey(state.Records)
 			status = db.Delete(key)
 		case "q":
-			fieldName, fieldValue, limit := GenerateQuery(config.IndexableFields, state.Records)
+			fieldName, fieldValue, limit := workload.GenerateQuery(workload.Config.IndexableFields, state.Records)
 			status = db.Query(fieldName, fieldValue, limit)
 		}
 		if status != nil {
@@ -155,17 +139,18 @@ func DoBatch(db databases.Database, config Config, state *State) {
 
 
 // Continuously run batches of operations
-func RunWorkload(database databases.Database, config Config, state *State, wg *sync.WaitGroup) {
+func (workload *DefaultWorkload) RunWorkload(database databases.Database, state *State, wg *sync.WaitGroup) {
 	// Calculate target time for batch execution. +Inf if not defined
-	targetBatchTime := float64(100) / float64(config.TargetThroughput)
-	for state.Operations < config.Operations {
+	targetBatchTime := float64(100) / float64(workload.Config.TargetThroughput)
+
+	for state.Operations < workload.Config.Operations {
 		// Increase number of passed operarions *before* batch execution in order to normally share key space with
 		// other workers
 		state.Operations += 100
 
 		// Send batch of request and measure execution time
 		t0 := time.Now()
-		DoBatch(database, config, state)
+		workload.DoBatch(database, state)
 		t1 := time.Now()
 
 		// Sleep if necessary

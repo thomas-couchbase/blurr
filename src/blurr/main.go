@@ -12,6 +12,7 @@ import (
 
 func main() {
 	var database databases.Database
+	var workload workloads.Workload
 
 	// Read configuration file
 	config := ReadConfig()
@@ -19,14 +20,20 @@ func main() {
 	// Create driver instance
 	switch config.Competitor {
 	case "MongoDB":
-		mongo := new(databases.MongoDB)
-		database = mongo
+		database = new(databases.MongoDB)
 	default:
 		panic("Unsupported competitor")
 	}
+	switch config.Workload.Type {
+	case "DefaultWorkload":
+		workload = new(workloads.DefaultWorkload)
+	default:
+		panic("Unsupported workload type")
+	}
 
-	// Initialize database
+	// Initialize database and workload
 	database.Init(config.Database)
+	workload.Init(config.Workload)
 
 	// Run concurrent workload
 	wg := new(sync.WaitGroup)
@@ -42,7 +49,7 @@ func main() {
 	// Start concurrent goroutines
 	for worker := 0; worker < config.Workload.Workers; worker++ {
 		wg.Add(1)
-		go workloads.RunWorkload(database, config.Workload, state, wg)
+		go workload.RunWorkload(database, state, wg)
 	}
 	// Continuously report performance stats
 	wgStats.Add(1)
