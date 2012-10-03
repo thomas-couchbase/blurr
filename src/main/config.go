@@ -11,6 +11,7 @@ import (
 )
 
 
+// High-level configuration structure
 type Config struct {
 	Competitor string
 	Database databases.Config
@@ -18,6 +19,8 @@ type Config struct {
 }
 
 
+// Read conifuration file (defined as CLI argument);
+// also calculate per client target throughput
 func ReadConfig() Config {
 	var path string
 	flag.StringVar(&path, "path", "samples/mongodb.conf", "Path to workload configuration")

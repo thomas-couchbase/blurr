@@ -15,12 +15,13 @@ import (
 )
 
 
+// General workload configuration
 type Config struct {
-	CreatePercentage int	// shorthand "c"
-	ReadPercentage int		// shorthand "r"
-	UpdatePercentage int	// shorthand "u"
-	DeletePercentage int	// shorthand "d"
-	QueryPercentage int		// shorthand "q"
+	CreatePercentage int  // shorthand "c"
+	ReadPercentage int    // shorthand "r"
+	UpdatePercentage int  // shorthand "u"
+	DeletePercentage int  // shorthand "d"
+	QueryPercentage int   // shorthand "q"
 	Records int64
 	Operations int64
 	ValueSize int
@@ -30,13 +31,15 @@ type Config struct {
 }
 
 
+// Type to store benchmark state
 type State struct {
-	Operations, Records int64
-	Errors []string
-	Events map[string]time.Time
+	Operations, Records int64    // operations done and total number of records in database
+	Errors []string              // total errors by operation type
+	Events map[string]time.Time  // runtime events ("Started", "Finished", and etc.)
 }
 
 
+// Generate hexdecimal representation of md5 hash for string
 func hash(in_string string) string {
 	h := md5.New()
 	h.Write([]byte(in_string))
@@ -44,12 +47,14 @@ func hash(in_string string) string {
 }
 
 
+// Generate new *unique* key
 func GenerateNewKey(current_records int64) string {
 	str_current_records := strconv.FormatInt(current_records, 10)
 	return hash(str_current_records)
 }
 
 
+// Generate random key from current key space
 func GenerateExistingKey(current_records int64) string {
 	rand.Seed(time.Now().UnixNano())
 	rand_record := rand.Int63n(current_records)
@@ -58,15 +63,19 @@ func GenerateExistingKey(current_records int64) string {
 }
 
 
+// Generate value with deterministic indexable fields and arbitrary body
 func GenerateValue(key string, indexable_fields, size int) map[string]interface{} {
+	// Hex lengh is 32 characters, so only 22 indexable fields are allowed
 	if indexable_fields >= 20 {
 		panic("Too much fields! It must be less than 20")
 	}
+	// Gererate indexable fields (shifting over key name)
 	map_value := make(map[string]interface{})
 	for i := 0; i < indexable_fields; i++ {
 		fieldName := "field" + strconv.Itoa(i)
 		map_value[fieldName] = fieldName + "-" +key[i:i + 10]
 	}
+	// Generate value body in order to meet value size specification
 	fieldName := "field" + strconv.Itoa(indexable_fields)
 	var buffer bytes.Buffer
 	var body_hash string = hash(key)
@@ -79,7 +88,7 @@ func GenerateValue(key string, indexable_fields, size int) map[string]interface{
 }
 
 
-
+// Generate slice of shuffled characters (CRUD-Q shorthands)
 func PrepareBatch(config Config) []string {
 	operations := make([]string, 0, 100)
 	rand_operations := make([]string, 100, 100)
@@ -108,6 +117,7 @@ func PrepareBatch(config Config) []string {
 }
 
 
+// Sequentially send 100 requests
 func DoBatch(db databases.Database, config Config, state *State) {
 	var key string
 	var value map[string]interface{}
@@ -138,6 +148,8 @@ func DoBatch(db databases.Database, config Config, state *State) {
 	}
 }
 
+
+// Continuously run batches of operations
 func RunWorkload(database databases.Database, config Config, state *State, wg *sync.WaitGroup) {
 	// Calculate target time for batch execution. +Inf if not defined
 	target_batch_time := float64(100) / float64(config.TargetThroughput)

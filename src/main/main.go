@@ -1,5 +1,6 @@
 package main
 
+
 import (
 	"sync"
 	"time"
@@ -7,6 +8,7 @@ import (
 	"databases"
 	"workloads"
 )
+
 
 func main() {
 	var database databases.Database
@@ -31,21 +33,25 @@ func main() {
 	wg_stats := new(sync.WaitGroup)
 	state := new(workloads.State)
 	state.Records = config.Workload.Records
+
+	// Initialize benchmark events
 	state.Events = make(map[string]time.Time)
 	state.Events["Started"] = time.Now()
+
+	// Start concurrent goroutines
 	for worker := 0; worker < config.Workload.Workers; worker++ {
 		wg.Add(1)
 		go workloads.RunWorkload(database, config.Workload, state, wg)
 	}
-	// Measure performance
+	// Continuously report performance stats
 	wg_stats.Add(1)
 	go report_throughput(config.Workload, state, wg_stats)
 
 	wg.Wait()
 	state.Events["Finished"] = time.Now()
-
-	database.Shutdown()
-
 	wg_stats.Wait()
+
+	// Close active connections (if any) and report final summary
+	database.Shutdown()
 	report_summary(state)
 }

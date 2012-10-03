@@ -15,7 +15,7 @@ type MongoDB struct {
 
 func (mongo *MongoDB) Init(config Config) {
 	var err error
-	mongo.Session, err = mgo.Dial(config.Addresses[0])
+	mongo.Session, err = mgo.Dial(config.Addresses[0])  // TODO: use multiple addresses as connection pool
 	if err != nil {
 		panic(err)
 	}
@@ -56,5 +56,5 @@ func (mongo *MongoDB) Delete(key string) error {
 
 
 func (mongo *MongoDB) Query(key string, value map[string]interface{}) error {
-	return nil
+	return nil  // TODO: implement queries on secondary indexes
 }

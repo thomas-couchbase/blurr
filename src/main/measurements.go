@@ -10,6 +10,8 @@ import (
 )
 
 
+// Report average throughput and overall progress every 10 seconds
+// TODO: report latency stats
 func report_throughput(config workloads.Config, state *workloads.State, wg *sync.WaitGroup) {
 	var ops_done int64 = 0
 	var samples int = 0
@@ -25,7 +27,9 @@ func report_throughput(config workloads.Config, state *workloads.State, wg *sync
 }
 
 
+// Report final summary: errors and elapsed time
+// TODO: report latency histogram
 func report_summary(state *workloads.State) {
-	fmt.Printf("Total errors: %v\n", len(state.Errors))
+	fmt.Printf("Total errors: %v\n", len(state.Errors))  // TODO: report errors by type
 	fmt.Printf("Time elapsed: %v\n", state.Events["Finished"].Sub(state.Events["Started"]))
 }
