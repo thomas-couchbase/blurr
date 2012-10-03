@@ -30,6 +30,16 @@ type Config struct {
 type Workload interface {
 	Init(config Config)
 
+	GenerateNewKey(currentRecords int64) string
+
+	GenerateExistingKey(currentRecords int64) string
+
+	GenerateKeyForRemoval() string
+
+	GenerateValue(key string, indexableFields, size int) map[string]interface{}
+
+	GenerateQuery(indexableFields int, currentRecords int64) (fieldName, fieldValue string, limit int)
+
 	RunWorkload(database databases.Database, state *State, wg *sync.WaitGroup)
 }
 
