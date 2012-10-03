@@ -30,7 +30,7 @@ func main() {
 
 	// Run concurrent workload
 	wg := new(sync.WaitGroup)
-	wg_stats := new(sync.WaitGroup)
+	wgStats := new(sync.WaitGroup)
 	state := new(workloads.State)
 	state.Records = config.Workload.Records
 
@@ -45,14 +45,14 @@ func main() {
 		go workloads.RunWorkload(database, config.Workload, state, wg)
 	}
 	// Continuously report performance stats
-	wg_stats.Add(1)
-	go report_throughput(config.Workload, state, wg_stats)
+	wgStats.Add(1)
+	go ReportThroughput(config.Workload, state, wgStats)
 
 	wg.Wait()
 	state.Events["Finished"] = time.Now()
-	wg_stats.Wait()
+	wgStats.Wait()
 
 	// Close active connections (if any) and report final summary
 	database.Shutdown()
-	report_summary(state)
+	ReportSummary(state)
 }
