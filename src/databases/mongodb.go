@@ -59,8 +59,8 @@ func (mongo *MongoDB) Delete(key string) error {
 }
 
 
-func (mongo *MongoDB) Query(key string, limit int) error {
+func (mongo *MongoDB) Query(fieldName, fieldValue string, limit int) error {
 	result := map[string]interface{}{}
-	err := mongo.Collection.Find(bson.M{"_id": bson.M{"$gte": key}}).Limit(limit).All(&result)
+	err := mongo.Collection.Find(bson.M{fieldName: bson.M{"$gte": fieldValue}}).Limit(limit).All(&result)
 	return err
 }

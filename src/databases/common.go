@@ -23,5 +23,5 @@ type Database interface {
 
 	Delete(key string) error
 
-	Query(key string, limit int) error
+	Query(fieldName, fieldValue string, limit int) error
 }

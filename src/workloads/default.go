@@ -88,6 +88,15 @@ func GenerateValue(key string, indexable_fields, size int) map[string]interface{
 }
 
 
+func GenerateQuery(indexable_fields int, current_records int64) (fieldName, fieldValue string, limit int) {
+	i := rand.Intn(indexable_fields)
+	fieldName = "field" + strconv.Itoa(i)
+	fieldValue = fieldName + "-" + GenerateExistingKey(current_records)[i:i + 10]
+	limit = 10 + rand.Intn(10)
+	return fieldName, fieldValue, limit
+}
+
+
 // Generate slice of shuffled characters (CRUD-Q shorthands)
 func PrepareBatch(config Config) []string {
 	operations := make([]string, 0, 100)
@@ -142,8 +151,8 @@ func DoBatch(db databases.Database, config Config, state *State) {
 			key = GenerateExistingKey(state.Records)
 			status = db.Delete(key)
 		case "q":
-			key = GenerateExistingKey(state.Records)
-			status = db.Query(key, 10)
+			fieldName, fieldValue, limit := GenerateQuery(config.IndexableFields, state.Records)
+			status = db.Query(fieldName, fieldValue, limit)
 		}
 		if status != nil {
 			state.Errors[v] ++
