@@ -3,6 +3,7 @@ package workloads
 
 import (
 	"sync"
+	"math"
 	"math/rand"
 	"strconv"
 	"crypto/md5"
@@ -25,6 +26,7 @@ type Config struct {
 	ValueSize int
 	IndexableFields int
 	Workers int
+	TargetThroughput int
 }
 
 
@@ -137,9 +139,26 @@ func DoBatch(db databases.Database, config Config, state *State) {
 }
 
 func RunWorkload(database databases.Database, config Config, state *State, wg *sync.WaitGroup) {
+	// Calculate target time for batch execution. +Inf if not defined
+	target_batch_time := float64(100) / float64(config.TargetThroughput)
 	for state.Operations < config.Operations {
+		// Increase number of passed operarions *before* batch execution in order to normally share key space with
+		// other workers
 		state.Operations += 100
+
+		// Send batch of request and measure execution time
+		t0 := time.Now()
 		DoBatch(database, config, state)
+		t1 := time.Now()
+
+		// Sleep if necessary
+		if !math.IsInf(target_batch_time, 0) {
+			actual_batch_time := t1.Sub(t0).Seconds()
+			sleep_time := (target_batch_time - actual_batch_time) * math.Pow(10, 9)
+			if sleep_time > 0 {
+				time.Sleep(time.Duration(sleep_time) * time.Nanosecond)
+			}
+		}
 	}
 	wg.Done()
 }

@@ -32,5 +32,6 @@ func ReadConfig() Config {
 	if err != nil {
 		panic(err)
 	}
+	config.Workload.TargetThroughput /= config.Workload.Workers
 	return config
 }
