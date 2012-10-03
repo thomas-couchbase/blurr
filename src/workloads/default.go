@@ -15,6 +15,7 @@ import (
 
 type DefaultWorkload struct {
 	Config Config
+	DeletedItems int64
 }
 
 
@@ -33,9 +34,17 @@ func (workload *DefaultWorkload) GenerateNewKey(currentRecords int64) string {
 // Generate random key from current key space
 func (workload *DefaultWorkload) GenerateExistingKey(currentRecords int64) string {
 	rand.Seed(time.Now().UnixNano())
-	randRecord := rand.Int63n(currentRecords)
+	randRecord := workload.DeletedItems + rand.Int63n(currentRecords - workload.DeletedItems)
 	strRandRecord := strconv.FormatInt(randRecord, 10)
 	return Hash(strRandRecord)
+}
+
+
+// Generate sequential key for removal
+func (workload *DefaultWorkload) GenerateKeyForRemoval() string {
+	keyForRemoval := strconv.FormatInt(workload.DeletedItems, 10)
+	workload.DeletedItems++
+	return Hash(keyForRemoval)
 }
 
 
@@ -124,7 +133,7 @@ func (workload *DefaultWorkload) DoBatch(db databases.Database, state *State) {
 			value = workload.GenerateValue(key, workload.Config.IndexableFields, workload.Config.ValueSize)
 			status = db.Update(key, value)
 		case "d":
-			key = workload.GenerateExistingKey(state.Records)
+			key = workload.GenerateKeyForRemoval()
 			status = db.Delete(key)
 		case "q":
 			fieldName, fieldValue, limit := workload.GenerateQuery(workload.Config.IndexableFields, state.Records)
