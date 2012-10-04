@@ -42,18 +42,18 @@ func main() {
 	state.Records = config.Workload.Records
 
 	// Initialize benchmark events
-	state.Errors = make(map[string]int)
-	state.Events = make(map[string]time.Time)
-	state.Events["Started"] = time.Now()
+	state.Init()
 
 	// Start concurrent goroutines
+	state.Events["Started"] = time.Now()
 	for worker := 0; worker < config.Workload.Workers; worker++ {
 		wg.Add(1)
 		go workload.RunWorkload(database, state, wg)
 	}
 	// Continuously report performance stats
-	wgStats.Add(1)
+	wgStats.Add(2)
 	go state.ReportThroughput(config.Workload, wgStats)
+	go state.MeasureLatency(database, workload, config.Workload, wgStats)
 
 	wg.Wait()
 	state.Events["Finished"] = time.Now()
