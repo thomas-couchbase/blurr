@@ -39,7 +39,7 @@ blurr uses JSON format for configuration. Example is below:
         }
     }
 
-Configuration includes three groups of parameters:
+Configuration includes two groups of parameters:
 * Database.Driver - database driver for benchmark
 * Database.Name - name of database
 * Database.Table - name of table, collection, bucket and etc.
