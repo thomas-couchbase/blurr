@@ -42,7 +42,7 @@ func (workload *DefaultWorkload) GenerateExistingKey(currentRecords int64) strin
 
 // Generate sequential key for removal
 func (workload *DefaultWorkload) GenerateKeyForRemoval() string {
-	keyForRemoval := strconv.FormatInt(workload.DeletedItems, 10)
+	keyForRemoval := strconv.FormatInt(workload.DeletedItems + 1, 10)
 	workload.DeletedItems++
 	return Hash(keyForRemoval)
 }
