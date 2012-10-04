@@ -18,6 +18,8 @@ package databases
 
 
 import (
+	"log"
+
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 )
@@ -37,7 +39,7 @@ func (mongo *MongoDB) Init(config Config) {
 	}
 	mongo.Session, err = mgo.Dial(pool)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	mongo.Session.SetMode(mgo.Monotonic, true)
 	mongo.Collection = mongo.Session.DB(config.Name).C(config.Table)

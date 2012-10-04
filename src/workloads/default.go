@@ -24,6 +24,7 @@ import (
 	"strconv"
 	"bytes"
 	"time"
+	"log"
 
 	"databases"
 )
@@ -68,7 +69,7 @@ func (workload *DefaultWorkload) GenerateKeyForRemoval() string {
 func (workload *DefaultWorkload) GenerateValue(key string, indexableFields, size int) map[string]interface{} {
 	// Hex lengh is 32 characters, so only 22 indexable fields are allowed
 	if indexableFields >= 20 {
-		panic("Too much fields! It must be less than 20")
+		log.Fatal("Too much fields! It must be less than 20")
 	}
 	// Gererate indexable fields (shifting over key name)
 	value := make(map[string]interface{})
@@ -118,7 +119,7 @@ func (workload *DefaultWorkload) PrepareBatch() []string {
 		operations = append(operations, "q")
 	}
 	if len(operations) != 100 {
-		panic("Wrong workload configuration: sum of percentages is not equal 100")
+		log.Fatal("Wrong workload configuration: sum of percentages is not equal 100")
 	}
 	for i, randI := range rand.Perm(100) {
 		randOperations[i] = operations[randI]

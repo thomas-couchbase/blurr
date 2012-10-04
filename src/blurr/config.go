@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	"encoding/json"
 	"flag"
+	"log"
 
 	"databases"
 	"workloads"
@@ -44,12 +45,12 @@ func ReadConfig() Config {
 
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	var config Config
 	err = json.Unmarshal(b, &config)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	config.Workload.TargetThroughput /= config.Workload.Workers
 	return config

@@ -20,6 +20,7 @@ package main
 import (
 	"sync"
 	"time"
+	"log"
 
 	"databases"
 	"workloads"
@@ -38,13 +39,13 @@ func main() {
 	case "MongoDB":
 		database = new(databases.MongoDB)
 	default:
-		panic("Unsupported competitor")
+		log.Fatal("Unsupported competitor")
 	}
 	switch config.Workload.Type {
 	case "DefaultWorkload":
 		workload = new(workloads.DefaultWorkload)
 	default:
-		panic("Unsupported workload type")
+		log.Fatal("Unsupported workload type")
 	}
 
 	// Initialize database and workload
