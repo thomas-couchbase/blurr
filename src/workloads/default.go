@@ -119,6 +119,10 @@ func (workload *DefaultWorkload) DoBatch(db databases.Database, state *State) {
 	var batch = workload.PrepareBatch()
 
 	for _, v := range batch {
+		// Increase number of passed operarions *before* batch execution in order to normally share key space with
+		// other workers
+		state.Operations ++
+
 		switch v {
 		case "c":
 			state.Records ++
@@ -153,10 +157,6 @@ func (workload *DefaultWorkload) RunWorkload(database databases.Database, state 
 	targetBatchTime := float64(100) / float64(workload.Config.TargetThroughput)
 
 	for state.Operations < workload.Config.Operations {
-		// Increase number of passed operarions *before* batch execution in order to normally share key space with
-		// other workers
-		state.Operations += 100
-
 		// Send batch of request and measure execution time
 		t0 := time.Now()
 		workload.DoBatch(database, state)
