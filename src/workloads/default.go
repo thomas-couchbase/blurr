@@ -121,31 +121,33 @@ func (workload *DefaultWorkload) DoBatch(db databases.Database, state *State) {
 	for _, v := range batch {
 		// Increase number of passed operarions *before* batch execution in order to normally share key space with
 		// other workers
-		state.Operations ++
+		if state.Operations < workload.Config.Operations {
+			state.Operations ++
 
-		switch v {
-		case "c":
-			state.Records ++
-			key = workload.GenerateNewKey(state.Records)
-			value = workload.GenerateValue(key, workload.Config.IndexableFields, workload.Config.ValueSize)
-			status = db.Create(key, value)
-		case "r":
-			key = workload.GenerateExistingKey(state.Records)
-			status = db.Read(key)
-		case "u":
-			key = workload.GenerateExistingKey(state.Records)
-			value = workload.GenerateValue(key, workload.Config.IndexableFields, workload.Config.ValueSize)
-			status = db.Update(key, value)
-		case "d":
-			key = workload.GenerateKeyForRemoval()
-			status = db.Delete(key)
-		case "q":
-			fieldName, fieldValue, limit := workload.GenerateQuery(workload.Config.IndexableFields, state.Records)
-			status = db.Query(fieldName, fieldValue, limit)
-		}
-		if status != nil {
-			state.Errors[v] ++
-			state.Errors["total"] ++
+			switch v {
+			case "c":
+				state.Records ++
+				key = workload.GenerateNewKey(state.Records)
+				value = workload.GenerateValue(key, workload.Config.IndexableFields, workload.Config.ValueSize)
+				status = db.Create(key, value)
+			case "r":
+				key = workload.GenerateExistingKey(state.Records)
+				status = db.Read(key)
+			case "u":
+				key = workload.GenerateExistingKey(state.Records)
+				value = workload.GenerateValue(key, workload.Config.IndexableFields, workload.Config.ValueSize)
+				status = db.Update(key, value)
+			case "d":
+				key = workload.GenerateKeyForRemoval()
+				status = db.Delete(key)
+			case "q":
+				fieldName, fieldValue, limit := workload.GenerateQuery(workload.Config.IndexableFields, state.Records)
+				status = db.Query(fieldName, fieldValue, limit)
+			}
+			if status != nil {
+				state.Errors[v] ++
+				state.Errors["total"] ++
+			}
 		}
 	}
 }
