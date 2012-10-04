@@ -18,7 +18,6 @@ package workloads
 
 import (
 	"fmt"
-	"math"
 	"sync"
 	"time"
 
@@ -79,7 +78,7 @@ func (state *State) MeasureLatency(database databases.Database,
 			t0 := time.Now()
 			database.Create(key, value)
 			t1 := time.Now()
-			state.Latency["Create"].AddSample(summstat.Sample(t1.Sub(t0).Seconds()))
+			state.Latency["Create"].AddSample(summstat.Sample(t1.Sub(t0)))
 		}
 		if config.ReadPercentage > 0 {
 			state.Operations++
@@ -87,7 +86,7 @@ func (state *State) MeasureLatency(database databases.Database,
 			t0 := time.Now()
 			database.Read(key)
 			t1 := time.Now()
-			state.Latency["Read"].AddSample(summstat.Sample(t1.Sub(t0).Seconds()))
+			state.Latency["Read"].AddSample(summstat.Sample(t1.Sub(t0)))
 		}
 		if config.UpdatePercentage > 0 {
 			state.Operations++
@@ -96,7 +95,7 @@ func (state *State) MeasureLatency(database databases.Database,
 			t0 := time.Now()
 			database.Update(key, value)
 			t1 := time.Now()
-			state.Latency["Update"].AddSample(summstat.Sample(t1.Sub(t0).Seconds()))
+			state.Latency["Update"].AddSample(summstat.Sample(t1.Sub(t0)))
 		}
 		if config.DeletePercentage > 0 {
 			state.Operations++
@@ -104,17 +103,18 @@ func (state *State) MeasureLatency(database databases.Database,
 			t0 := time.Now()
 			database.Delete(key)
 			t1 := time.Now()
-			state.Latency["Delete"].AddSample(summstat.Sample(t1.Sub(t0).Seconds()))
+			state.Latency["Delete"].AddSample(summstat.Sample(t1.Sub(t0)))
 		}
 		if config.QueryPercentage > 0 {
 			state.Operations++
-			fieldName, fieldValue, limit := workload.GenerateQuery(config.IndexableFields, state.Records)
+			fieldName, fieldValue, limit := workload.GenerateQuery(config.IndexableFields,
+				state.Records)
 			t0 := time.Now()
 			database.Query(fieldName, fieldValue, limit)
 			t1 := time.Now()
-			state.Latency["Query"].AddSample(summstat.Sample(t1.Sub(t0).Seconds()))
+			state.Latency["Query"].AddSample(summstat.Sample(t1.Sub(t0)))
 		}
-		time.Sleep(1 * time.Second)
+		time.Sleep(time.Second)
 	}
 }
 
@@ -123,10 +123,10 @@ func (state *State) ReportSummary() {
 	for _, op := range []string{"Create", "Read", "Update", "Delete", "Query"} {
 		if state.Latency[op].Count() > 0 {
 			fmt.Printf("%v latency:\n", op)
-			perc80th := time.Duration(float64(state.Latency[op].Percentile(0.8))*math.Pow(10, 9)) * time.Nanosecond
-			perc90th := time.Duration(float64(state.Latency[op].Percentile(0.9))*math.Pow(10, 9)) * time.Nanosecond
-			perc95th := time.Duration(float64(state.Latency[op].Percentile(0.95))*math.Pow(10, 9)) * time.Nanosecond
-			mean := time.Duration(float64(state.Latency[op].Mean())*math.Pow(10, 9)) * time.Nanosecond
+			perc80th := time.Duration(state.Latency[op].Percentile(0.8))
+			perc90th := time.Duration(state.Latency[op].Percentile(0.9))
+			perc95th := time.Duration(state.Latency[op].Percentile(0.95))
+			mean := time.Duration(state.Latency[op].Mean())
 			fmt.Printf("\t80th percentile: %v\n", perc80th)
 			fmt.Printf("\t90th percentile: %v\n", perc90th)
 			fmt.Printf("\t95th percentile: %v\n", perc95th)
@@ -142,5 +142,6 @@ func (state *State) ReportSummary() {
 		fmt.Printf("\tQuery  : %v\n", state.Errors["q"])
 		fmt.Printf("\tTotal  : %v\n", state.Errors["total"])
 	}
-	fmt.Printf("Time elapsed:\n\t%v\n", state.Events["Finished"].Sub(state.Events["Started"]))
+	fmt.Printf("Time elapsed:\n\t%v\n",
+		state.Events["Finished"].Sub(state.Events["Started"]))
 }

@@ -176,7 +176,8 @@ func (workload *DefaultWorkload) RunWorkload(database databases.Database,
 	defer wg.Done()
 
 	// Calculate target time for batch execution. +Inf if not defined
-	targetBatchTime := float64(100) / float64(workload.Config.TargetThroughput)
+	targetBatchTimeF := float64(100) /
+		float64(workload.Config.TargetThroughput)
 
 	for state.Operations < workload.Config.Operations {
 		// Send batch of request and measure execution time
@@ -185,11 +186,12 @@ func (workload *DefaultWorkload) RunWorkload(database databases.Database,
 		t1 := time.Now()
 
 		// Sleep if necessary
-		if !math.IsInf(targetBatchTime, 0) {
-			actualBatchTime := t1.Sub(t0).Seconds()
-			sleepTime := (targetBatchTime - actualBatchTime) * math.Pow(10, 9)
+		if !math.IsInf(targetBatchTimeF, 0) {
+			targetBatchTime := time.Duration(targetBatchTimeF)
+			actualBatchTime := t1.Sub(t0)
+			sleepTime := (targetBatchTime - actualBatchTime)
 			if sleepTime > 0 {
-				time.Sleep(time.Duration(sleepTime) * time.Nanosecond)
+				time.Sleep(time.Duration(sleepTime))
 			}
 		}
 	}
