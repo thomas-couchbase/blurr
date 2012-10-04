@@ -8,8 +8,8 @@ Usage
     blurr -path=workloads/workload.conf
 
 
-Condifuration files
-------------------
+Configuration files
+-------------------
 blurr uses JSON format for configuration. Example is below:
 
     {
