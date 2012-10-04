@@ -16,16 +16,14 @@
 */
 package main
 
-
 import (
+	"log"
 	"sync"
 	"time"
-	"log"
 
-	"databases"
-	"workloads"
+	"github.com/pavel-paulau/blurr/databases"
+	"github.com/pavel-paulau/blurr/workloads"
 )
-
 
 func main() {
 	var database databases.Database

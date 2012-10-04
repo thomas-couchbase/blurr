@@ -16,13 +16,12 @@
 */
 package workloads
 
-
 import (
 	"crypto/md5"
 	"encoding/hex"
 	"sync"
 
-	"databases"
+	"github.com/pavel-paulau/blurr/databases"
 )
 
 
@@ -58,7 +57,6 @@ type Workload interface {
 
 	RunWorkload(database databases.Database, state *State, wg *sync.WaitGroup)
 }
-
 
 func Hash(inString string) string {
 	h := md5.New()

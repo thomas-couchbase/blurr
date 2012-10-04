@@ -16,26 +16,27 @@
 */
 package workloads
 
-
 import (
 	"fmt"
-	"time"
-	"sync"
 	"math"
+	"sync"
+	"time"
 
-	"databases"
-	"summstat"
+	"github.com/pavel-paulau/blurr/databases"
+	"github.com/pavel-paulau/blurr/summstat"
 )
-
 
 // Type to store benchmark state
 type State struct {
-	Operations, Records int64          // operations done and total number of records in database
-	Errors map[string]int              // total errors by operation type
-	Events map[string]time.Time        // runtime events ("Started", "Finished", and etc.)
-	Latency map[string]*summstat.Stats // latency arrays per request type
+	// operations done and total number of records in database
+	Operations, Records int64
+	// total errors by operation type
+	Errors map[string]int
+	// runtime events ("Started", "Finished", and etc.)
+	Events map[string]time.Time
+	// latency arrays per request type
+	Latency map[string]*summstat.Stats
 }
-
 
 func (state *State) Init() {
 	state.Errors = make(map[string]int)
@@ -59,18 +60,17 @@ func (state *State) ReportThroughput(config Config, wg *sync.WaitGroup) {
 		throughput := (state.Operations - opsDone) / 10
 		opsDone = state.Operations
 		fmt.Printf("%6v seconds: %10v ops/sec; total operations: %v; total errors: %v\n",
-				samples * 10, throughput, opsDone, state.Errors["total"])
-		samples ++
+			samples*10, throughput, opsDone, state.Errors["total"])
+		samples++
 	}
 	wg.Done()
 }
 
-
 func (state *State) MeasureLatency(database databases.Database, workload Workload, config Config, wg *sync.WaitGroup) {
 	for state.Operations < config.Operations {
 		if config.CreatePercentage > 0 {
-			state.Operations ++
-			state.Records ++
+			state.Operations++
+			state.Records++
 			key := workload.GenerateNewKey(state.Records)
 			value := workload.GenerateValue(key, config.IndexableFields, config.ValueSize)
 			t0 := time.Now()
@@ -79,7 +79,7 @@ func (state *State) MeasureLatency(database databases.Database, workload Workloa
 			state.Latency["Create"].AddSample(summstat.Sample(t1.Sub(t0).Seconds()))
 		}
 		if config.ReadPercentage > 0 {
-			state.Operations ++
+			state.Operations++
 			key := workload.GenerateExistingKey(state.Records)
 			t0 := time.Now()
 			database.Read(key)
@@ -87,7 +87,7 @@ func (state *State) MeasureLatency(database databases.Database, workload Workloa
 			state.Latency["Read"].AddSample(summstat.Sample(t1.Sub(t0).Seconds()))
 		}
 		if config.UpdatePercentage > 0 {
-			state.Operations ++
+			state.Operations++
 			key := workload.GenerateExistingKey(state.Records)
 			value := workload.GenerateValue(key, config.IndexableFields, config.ValueSize)
 			t0 := time.Now()
@@ -96,7 +96,7 @@ func (state *State) MeasureLatency(database databases.Database, workload Workloa
 			state.Latency["Update"].AddSample(summstat.Sample(t1.Sub(t0).Seconds()))
 		}
 		if config.DeletePercentage > 0 {
-			state.Operations ++
+			state.Operations++
 			key := workload.GenerateKeyForRemoval()
 			t0 := time.Now()
 			database.Delete(key)
@@ -104,7 +104,7 @@ func (state *State) MeasureLatency(database databases.Database, workload Workloa
 			state.Latency["Delete"].AddSample(summstat.Sample(t1.Sub(t0).Seconds()))
 		}
 		if config.QueryPercentage > 0 {
-			state.Operations ++
+			state.Operations++
 			fieldName, fieldValue, limit := workload.GenerateQuery(config.IndexableFields, state.Records)
 			t0 := time.Now()
 			database.Query(fieldName, fieldValue, limit)
@@ -116,16 +116,15 @@ func (state *State) MeasureLatency(database databases.Database, workload Workloa
 	wg.Done()
 }
 
-
 // Report final summary: errors and elapsed time
 func (state *State) ReportSummary() {
 	for _, op := range []string{"Create", "Read", "Update", "Delete", "Query"} {
 		if state.Latency[op].Count() > 0 {
 			fmt.Printf("%v latency:\n", op)
-			perc80th := time.Duration(float64(state.Latency[op].Percentile(0.8)) * math.Pow(10, 9)) * time.Nanosecond
-			perc90th := time.Duration(float64(state.Latency[op].Percentile(0.9)) * math.Pow(10, 9)) * time.Nanosecond
-			perc95th := time.Duration(float64(state.Latency[op].Percentile(0.95)) * math.Pow(10, 9)) * time.Nanosecond
-			mean := time.Duration(float64(state.Latency[op].Mean()) * math.Pow(10, 9)) * time.Nanosecond
+			perc80th := time.Duration(float64(state.Latency[op].Percentile(0.8))*math.Pow(10, 9)) * time.Nanosecond
+			perc90th := time.Duration(float64(state.Latency[op].Percentile(0.9))*math.Pow(10, 9)) * time.Nanosecond
+			perc95th := time.Duration(float64(state.Latency[op].Percentile(0.95))*math.Pow(10, 9)) * time.Nanosecond
+			mean := time.Duration(float64(state.Latency[op].Mean())*math.Pow(10, 9)) * time.Nanosecond
 			fmt.Printf("\t80th percentile: %v\n", perc80th)
 			fmt.Printf("\t90th percentile: %v\n", perc90th)
 			fmt.Printf("\t95th percentile: %v\n", perc95th)

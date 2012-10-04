@@ -16,24 +16,21 @@
 */
 package main
 
-
 import (
-	"io/ioutil"
 	"encoding/json"
 	"flag"
+	"io/ioutil"
 	"log"
 
-	"databases"
-	"workloads"
+	"github.com/pavel-paulau/blurr/databases"
+	"github.com/pavel-paulau/blurr/workloads"
 )
-
 
 // High-level configuration structure
 type Config struct {
 	Database databases.Config
 	Workload workloads.Config
 }
-
 
 // Read conifuration file (defined as CLI argument);
 // also calculate per client target throughput
