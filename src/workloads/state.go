@@ -37,6 +37,7 @@ func (state *State) Init() {
 func (state *State) ReportThroughput(config Config, wg *sync.WaitGroup) {
 	var opsDone int64 = 0
 	var samples int = 1
+	fmt.Println("Benchmark started:")
 	for state.Operations < config.Operations {
 		time.Sleep(10 * time.Second)
 		throughput := (state.Operations - opsDone) / 10
