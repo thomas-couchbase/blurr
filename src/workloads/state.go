@@ -53,8 +53,8 @@ func (state *State) ReportThroughput(config Config, wg *sync.WaitGroup) {
 func (state *State) MeasureLatency(database databases.Database, workload Workload, config Config, wg *sync.WaitGroup) {
 	for state.Operations < config.Operations {
 		if config.CreatePercentage > 0 {
-			state.Records ++
 			state.Operations ++
+			state.Records ++
 			key := workload.GenerateNewKey(state.Records)
 			value := workload.GenerateValue(key, config.IndexableFields, config.ValueSize)
 			t0 := time.Now()

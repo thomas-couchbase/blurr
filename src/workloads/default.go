@@ -122,25 +122,28 @@ func (workload *DefaultWorkload) DoBatch(db databases.Database, state *State) {
 		// Increase number of passed operarions *before* batch execution in order to normally share key space with
 		// other workers
 		if state.Operations < workload.Config.Operations {
-			state.Operations ++
-
 			switch v {
 			case "c":
+				state.Operations ++
 				state.Records ++
 				key = workload.GenerateNewKey(state.Records)
 				value = workload.GenerateValue(key, workload.Config.IndexableFields, workload.Config.ValueSize)
 				status = db.Create(key, value)
 			case "r":
+				state.Operations ++
 				key = workload.GenerateExistingKey(state.Records)
 				status = db.Read(key)
 			case "u":
+				state.Operations ++
 				key = workload.GenerateExistingKey(state.Records)
 				value = workload.GenerateValue(key, workload.Config.IndexableFields, workload.Config.ValueSize)
 				status = db.Update(key, value)
 			case "d":
+				state.Operations ++
 				key = workload.GenerateKeyForRemoval()
 				status = db.Delete(key)
 			case "q":
+				state.Operations ++
 				fieldName, fieldValue, limit := workload.GenerateQuery(workload.Config.IndexableFields, state.Records)
 				status = db.Query(fieldName, fieldValue, limit)
 			}
