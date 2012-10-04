@@ -52,8 +52,8 @@ func (state *State) Init() {
 // Report average throughput and overall progress every 10 seconds
 func (state *State) ReportThroughput(config Config, wg *sync.WaitGroup) {
 	defer wg.Done()
-	var opsDone int64 = 0
-	var samples int = 1
+	opsDone := int64(0)
+	samples := 1
 	fmt.Println("Benchmark started:")
 	for state.Operations < config.Operations {
 		time.Sleep(10 * time.Second)

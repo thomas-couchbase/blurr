@@ -18,6 +18,7 @@ package databases
 
 import (
 	"log"
+	"strings"
 
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
@@ -29,11 +30,8 @@ type MongoDB struct {
 }
 
 func (mongo *MongoDB) Init(config Config) {
+	pool := strings.Join(config.Addresses, ",")
 	var err error
-	var pool string = ""
-	for _, address := range config.Addresses {
-		pool += address + ","
-	}
 	mongo.Session, err = mgo.Dial(pool)
 	if err != nil {
 		log.Fatal(err)

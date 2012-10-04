@@ -74,8 +74,8 @@ func (workload *DefaultWorkload) GenerateValue(key string,
 	}
 	// Generate value body in order to meet value size specification
 	fieldName := "field" + strconv.Itoa(indexableFields)
-	var buffer bytes.Buffer
-	var bodyHash string = Hash(key)
+	buffer := bytes.Buffer{}
+	bodyHash := Hash(key)
 	iterations := (size - len(fieldName+"-"+key[:10])*indexableFields) / 32
 	for i := 0; i < iterations; i++ {
 		buffer.WriteString(bodyHash)
@@ -124,45 +124,39 @@ func (workload *DefaultWorkload) PrepareBatch() []string {
 
 // Sequentially send 100 requests
 func (workload *DefaultWorkload) DoBatch(db databases.Database, state *State) {
-	var key string
-	var value map[string]interface{}
-	var status error
-	var batch = workload.PrepareBatch()
+	batch := workload.PrepareBatch()
 
 	for _, v := range batch {
 		// Increase number of passed operarions *before* batch
 		// execution in order to normally share key space with
 		// other workers
 		if state.Operations < workload.Config.Operations {
+			var err error
+			state.Operations++
 			switch v {
 			case "c":
-				state.Operations++
 				state.Records++
-				key = workload.GenerateNewKey(state.Records)
-				value = workload.GenerateValue(key,
+				key := workload.GenerateNewKey(state.Records)
+				value := workload.GenerateValue(key,
 					workload.Config.IndexableFields, workload.Config.ValueSize)
-				status = db.Create(key, value)
+				err = db.Create(key, value)
 			case "r":
-				state.Operations++
-				key = workload.GenerateExistingKey(state.Records)
-				status = db.Read(key)
+				key := workload.GenerateExistingKey(state.Records)
+				err = db.Read(key)
 			case "u":
-				state.Operations++
-				key = workload.GenerateExistingKey(state.Records)
-				value = workload.GenerateValue(key,
+				key := workload.GenerateExistingKey(state.Records)
+				value := workload.GenerateValue(key,
 					workload.Config.IndexableFields, workload.Config.ValueSize)
-				status = db.Update(key, value)
+				err = db.Update(key, value)
 			case "d":
-				state.Operations++
-				key = workload.GenerateKeyForRemoval()
-				status = db.Delete(key)
+				key := workload.GenerateKeyForRemoval()
+				err = db.Delete(key)
 			case "q":
-				state.Operations++
 				fieldName, fieldValue, limit := workload.GenerateQuery(
 					workload.Config.IndexableFields, state.Records)
-				status = db.Query(fieldName, fieldValue, limit)
+				err = db.Query(fieldName, fieldValue, limit)
 			}
-			if status != nil {
+			if err != nil {
 				state.Errors[v]++
 				state.Errors["total"]++
 			}
