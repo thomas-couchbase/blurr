@@ -122,6 +122,20 @@ func (workload *DefaultWorkload) PrepareBatch() []string {
 	return randOperations
 }
 
+func (w *DefaultWorkload) Something() chan string {
+	operations := w.PrepareBatch()
+
+	ch := make(chan string, 100000)
+
+	go func() {
+		for {
+			ch <- operations[rand.Intn(100)]
+		}
+	}()
+
+	return ch
+}
+
 // Sequentially send 100 requests
 func (workload *DefaultWorkload) DoBatch(db databases.Database, state *State) {
 	batch := workload.PrepareBatch()
