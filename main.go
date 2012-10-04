@@ -35,13 +35,13 @@ func main() {
 	// Create driver instance
 	switch config.Database.Driver {
 	case "MongoDB":
-		database = new(databases.MongoDB)
+		database = &databases.MongoDB{}
 	default:
 		log.Fatal("Unsupported competitor")
 	}
 	switch config.Workload.Type {
 	case "DefaultWorkload":
-		workload = new(workloads.DefaultWorkload)
+		workload = &workloads.DefaultWorkload{}
 	default:
 		log.Fatal("Unsupported workload type")
 	}
@@ -51,9 +51,9 @@ func main() {
 	workload.Init(config.Workload)
 
 	// Run concurrent workload
-	wg := new(sync.WaitGroup)
-	wgStats := new(sync.WaitGroup)
-	state := new(workloads.State)
+	wg := sync.WaitGroup{}
+	wgStats := sync.WaitGroup{}
+	state := workloads.State{}
 	state.Records = config.Workload.Records
 
 	// Initialize benchmark events
@@ -63,12 +63,12 @@ func main() {
 	state.Events["Started"] = time.Now()
 	for worker := 0; worker < config.Workload.Workers; worker++ {
 		wg.Add(1)
-		go workload.RunWorkload(database, state, wg)
+		go workload.RunWorkload(database, &state, &wg)
 	}
 	// Continuously report performance stats
 	wgStats.Add(2)
-	go state.ReportThroughput(config.Workload, wgStats)
-	go state.MeasureLatency(database, workload, config.Workload, wgStats)
+	go state.ReportThroughput(config.Workload, &wgStats)
+	go state.MeasureLatency(database, workload, config.Workload, &wgStats)
 
 	wg.Wait()
 	state.Events["Finished"] = time.Now()

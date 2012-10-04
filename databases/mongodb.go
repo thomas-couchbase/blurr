@@ -23,12 +23,10 @@ import (
 	"labix.org/v2/mgo/bson"
 )
 
-
 type MongoDB struct {
 	Collection *mgo.Collection
-	Session *mgo.Session
+	Session    *mgo.Session
 }
-
 
 func (mongo *MongoDB) Init(config Config) {
 	var err error
@@ -72,6 +70,7 @@ func (mongo *MongoDB) Delete(key string) error {
 
 func (mongo *MongoDB) Query(fieldName, fieldValue string, limit int) error {
 	var result []map[string]interface{}
-	err := mongo.Collection.Find(bson.M{fieldName: bson.M{"$gte": fieldValue}}).Limit(limit).Iter().All(&result)
+	err := mongo.Collection.Find(bson.M{fieldName: bson.M{"$gte": fieldValue}}).
+		Limit(limit).Iter().All(&result)
 	return err
 }

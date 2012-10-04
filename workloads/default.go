@@ -59,22 +59,24 @@ func (workload *DefaultWorkload) GenerateKeyForRemoval() string {
 }
 
 // Generate value with deterministic indexable fields and arbitrary body
-func (workload *DefaultWorkload) GenerateValue(key string, indexableFields, size int) map[string]interface{} {
+func (workload *DefaultWorkload) GenerateValue(key string,
+	indexableFields, size int) map[string]interface{} {
+
 	// Hex lengh is 32 characters, so only 22 indexable fields are allowed
 	if indexableFields >= 20 {
 		log.Fatal("Too much fields! It must be less than 20")
 	}
 	// Gererate indexable fields (shifting over key name)
-	value := make(map[string]interface{})
+	value := map[string]interface{}{}
 	for i := 0; i < indexableFields; i++ {
 		fieldName := "field" + strconv.Itoa(i)
-		value[fieldName] = fieldName + "-" +key[i:i + 10]
+		value[fieldName] = fieldName + "-" + key[i:i+10]
 	}
 	// Generate value body in order to meet value size specification
 	fieldName := "field" + strconv.Itoa(indexableFields)
 	var buffer bytes.Buffer
 	var bodyHash string = Hash(key)
-	iterations := (size - len(fieldName + "-" + key[:10]) * indexableFields) / 32
+	iterations := (size - len(fieldName+"-"+key[:10])*indexableFields) / 32
 	for i := 0; i < iterations; i++ {
 		buffer.WriteString(bodyHash)
 	}
@@ -82,7 +84,9 @@ func (workload *DefaultWorkload) GenerateValue(key string, indexableFields, size
 	return value
 }
 
-func (workload *DefaultWorkload) GenerateQuery(indexableFields int, currentRecords int64) (string, string, int) {
+func (workload *DefaultWorkload) GenerateQuery(indexableFields int,
+	currentRecords int64) (string, string, int) {
+
 	i := rand.Intn(indexableFields)
 	fieldName := "field" + strconv.Itoa(i)
 	fieldValue := fieldName + "-" + workload.GenerateExistingKey(currentRecords)[i:i+10]
@@ -118,7 +122,6 @@ func (workload *DefaultWorkload) PrepareBatch() []string {
 	return randOperations
 }
 
-
 // Sequentially send 100 requests
 func (workload *DefaultWorkload) DoBatch(db databases.Database, state *State) {
 	var key string
@@ -127,7 +130,8 @@ func (workload *DefaultWorkload) DoBatch(db databases.Database, state *State) {
 	var batch = workload.PrepareBatch()
 
 	for _, v := range batch {
-		// Increase number of passed operarions *before* batch execution in order to normally share key space with
+		// Increase number of passed operarions *before* batch
+		// execution in order to normally share key space with
 		// other workers
 		if state.Operations < workload.Config.Operations {
 			switch v {
@@ -135,7 +139,8 @@ func (workload *DefaultWorkload) DoBatch(db databases.Database, state *State) {
 				state.Operations++
 				state.Records++
 				key = workload.GenerateNewKey(state.Records)
-				value = workload.GenerateValue(key, workload.Config.IndexableFields, workload.Config.ValueSize)
+				value = workload.GenerateValue(key,
+					workload.Config.IndexableFields, workload.Config.ValueSize)
 				status = db.Create(key, value)
 			case "r":
 				state.Operations++
@@ -144,7 +149,8 @@ func (workload *DefaultWorkload) DoBatch(db databases.Database, state *State) {
 			case "u":
 				state.Operations++
 				key = workload.GenerateExistingKey(state.Records)
-				value = workload.GenerateValue(key, workload.Config.IndexableFields, workload.Config.ValueSize)
+				value = workload.GenerateValue(key,
+					workload.Config.IndexableFields, workload.Config.ValueSize)
 				status = db.Update(key, value)
 			case "d":
 				state.Operations++
@@ -152,7 +158,8 @@ func (workload *DefaultWorkload) DoBatch(db databases.Database, state *State) {
 				status = db.Delete(key)
 			case "q":
 				state.Operations++
-				fieldName, fieldValue, limit := workload.GenerateQuery(workload.Config.IndexableFields, state.Records)
+				fieldName, fieldValue, limit := workload.GenerateQuery(
+					workload.Config.IndexableFields, state.Records)
 				status = db.Query(fieldName, fieldValue, limit)
 			}
 			if status != nil {
@@ -164,7 +171,10 @@ func (workload *DefaultWorkload) DoBatch(db databases.Database, state *State) {
 }
 
 // Continuously run batches of operations
-func (workload *DefaultWorkload) RunWorkload(database databases.Database, state *State, wg *sync.WaitGroup) {
+func (workload *DefaultWorkload) RunWorkload(database databases.Database,
+	state *State, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	// Calculate target time for batch execution. +Inf if not defined
 	targetBatchTime := float64(100) / float64(workload.Config.TargetThroughput)
 
@@ -183,5 +193,4 @@ func (workload *DefaultWorkload) RunWorkload(database databases.Database, state 
 			}
 		}
 	}
-	wg.Done()
 }

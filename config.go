@@ -36,7 +36,8 @@ type Config struct {
 // also calculate per client target throughput
 func ReadConfig() Config {
 	var path string
-	flag.StringVar(&path, "path", "samples/workload.conf", "Path to workload configuration")
+	flag.StringVar(&path, "path", "samples/workload.conf",
+		"Path to workload configuration")
 	flag.Parse()
 
 	b, err := ioutil.ReadFile(path)

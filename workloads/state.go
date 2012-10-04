@@ -40,9 +40,9 @@ type State struct {
 }
 
 func (state *State) Init() {
-	state.Errors = make(map[string]int)
-	state.Events = make(map[string]time.Time)
-	state.Latency = make(map[string]*summstat.Stats)
+	state.Errors = map[string]int{}
+	state.Events = map[string]time.Time{}
+	state.Latency = map[string]*summstat.Stats{}
 	state.Latency["Create"] = summstat.NewStats()
 	state.Latency["Read"] = summstat.NewStats()
 	state.Latency["Update"] = summstat.NewStats()
@@ -52,6 +52,7 @@ func (state *State) Init() {
 
 // Report average throughput and overall progress every 10 seconds
 func (state *State) ReportThroughput(config Config, wg *sync.WaitGroup) {
+	defer wg.Done()
 	var opsDone int64 = 0
 	var samples int = 1
 	fmt.Println("Benchmark started:")
@@ -63,10 +64,12 @@ func (state *State) ReportThroughput(config Config, wg *sync.WaitGroup) {
 			samples*10, throughput, opsDone, state.Errors["total"])
 		samples++
 	}
-	wg.Done()
 }
 
-func (state *State) MeasureLatency(database databases.Database, workload Workload, config Config, wg *sync.WaitGroup) {
+func (state *State) MeasureLatency(database databases.Database,
+	workload Workload, config Config, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	for state.Operations < config.Operations {
 		if config.CreatePercentage > 0 {
 			state.Operations++
@@ -113,7 +116,6 @@ func (state *State) MeasureLatency(database databases.Database, workload Workloa
 		}
 		time.Sleep(1 * time.Second)
 	}
-	wg.Done()
 }
 
 // Report final summary: errors and elapsed time
