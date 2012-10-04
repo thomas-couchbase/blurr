@@ -22,8 +22,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/patrick-higgins/summstat"
+
 	"github.com/pavel-paulau/blurr/databases"
-	"github.com/pavel-paulau/blurr/summstat"
 )
 
 // Type to store benchmark state
@@ -48,7 +49,6 @@ func (state *State) Init() {
 	state.Latency["Delete"] = summstat.NewStats()
 	state.Latency["Query"] = summstat.NewStats()
 }
-
 
 // Report average throughput and overall progress every 10 seconds
 func (state *State) ReportThroughput(config Config, wg *sync.WaitGroup) {
