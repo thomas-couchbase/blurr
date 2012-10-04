@@ -3,6 +3,11 @@ blurr
 
 blurr is simple and flexible tool for database benchmarking. It's written in Go and supports custom database drivers and workloads.
 
+Dependencies
+------------
+
+    go get labix.org/v2/mgo
+
 Usage
 -----
     blurr -path=workloads/workload.conf
