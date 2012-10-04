@@ -18,6 +18,7 @@ package databases
 
 
 type Config struct {
+	Driver string
 	Name string
 	Table string
 	Addresses []string

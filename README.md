@@ -13,8 +13,8 @@ Condifuration files
 blurr uses JSON format for configuration. Example is below:
 
     {
-        "Competitor": "MongoDB",
         "Database": {
+            "Driver": "MongoDB",
             "Name": "default",
             "Table": "default",
             "Addresses": [
@@ -40,7 +40,7 @@ blurr uses JSON format for configuration. Example is below:
     }
 
 Configuration includes three groups of parameters:
-* Competitor - database driver for benchmark
+* Database.Driver - database driver for benchmark
 * Database.Name - name of database
 * Database.Table - name of table, collection, bucket and etc.
 * Database.Addresses - list of host:port string to use in connection pool

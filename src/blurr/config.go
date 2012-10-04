@@ -30,7 +30,6 @@ import (
 
 // High-level configuration structure
 type Config struct {
-	Competitor string
 	Database databases.Config
 	Workload workloads.Config
 }

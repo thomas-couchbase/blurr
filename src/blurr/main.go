@@ -35,7 +35,7 @@ func main() {
 	config := ReadConfig()
 
 	// Create driver instance
-	switch config.Competitor {
+	switch config.Database.Driver {
 	case "MongoDB":
 		database = new(databases.MongoDB)
 	default:
