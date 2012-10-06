@@ -179,7 +179,7 @@ func (workload *DefaultWorkload) RunWorkload(database databases.Database,
 
 		// Sleep if necessary
 		if !math.IsInf(targetBatchTimeF, 0) {
-			targetBatchTime := time.Duration(targetBatchTimeF)
+			targetBatchTime := time.Duration(targetBatchTimeF * math.Pow10(9))
 			actualBatchTime := t1.Sub(t0)
 			sleepTime := (targetBatchTime - actualBatchTime)
 			if sleepTime > 0 {
