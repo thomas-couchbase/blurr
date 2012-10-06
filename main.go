@@ -36,6 +36,8 @@ func main() {
 	switch config.Database.Driver {
 	case "MongoDB":
 		database = &databases.MongoDB{}
+	case "Couchbase":
+		database = &databases.Couchbase{}
 	default:
 		log.Fatal("Unsupported competitor")
 	}
