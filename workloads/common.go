@@ -22,6 +22,8 @@ type Config struct {
 	IndexableFields int
 	Workers int
 	TargetThroughput int
+	HotDataPercentage int64
+	HotSpotAccessPercentage int
 }
 
 type Workload interface {
