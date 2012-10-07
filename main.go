@@ -27,14 +27,13 @@ func main() {
 	}
 	switch config.Workload.Type {
 	case "Default":
-		workload = &workloads.Default{}
+		workload = &workloads.Default{Config: config.Workload}
 	default:
 		log.Fatal("Unsupported workload type")
 	}
 
 	// Initialize database and workload
 	database.Init(config.Database)
-	workload.Init(config.Workload)
 
 	// Run concurrent workload
 	wg := sync.WaitGroup{}

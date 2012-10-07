@@ -25,8 +25,6 @@ type Config struct {
 }
 
 type Workload interface {
-	Init(config Config)
-
 	GenerateNewKey(currentRecords int64) string
 
 	GenerateExistingKey(currentRecords int64) string

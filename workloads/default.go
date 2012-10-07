@@ -17,10 +17,6 @@ type Default struct {
 	DeletedItems int64
 }
 
-func (w *Default) Init(config Config) {
-	w.Config = config
-}
-
 // Generate new *unique* key
 func (w *Default) GenerateNewKey(currentRecords int64) string {
 	strCurrentRecords := strconv.FormatInt(currentRecords, 10)
