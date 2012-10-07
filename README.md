@@ -16,7 +16,7 @@ Installation
 
 Usage
 -----
-    blurr -path=workloads/workload.conf
+    blurr -workload=workloads/workload.conf
 
 
 Configuration files
