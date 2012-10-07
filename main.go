@@ -26,8 +26,8 @@ func main() {
 		log.Fatal("Unsupported competitor")
 	}
 	switch config.Workload.Type {
-	case "DefaultWorkload":
-		workload = &workloads.DefaultWorkload{}
+	case "Default":
+		workload = &workloads.Default{}
 	default:
 		log.Fatal("Unsupported workload type")
 	}

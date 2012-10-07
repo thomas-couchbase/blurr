@@ -35,7 +35,7 @@ blurr uses JSON format for configuration. Example is below:
             ]
         },
         "Workload": {
-            "Type": "DefaultWorkload",
+            "Type": "Default",
             "CreatePercentage": 4,
             "ReadPercentage": 60,
             "UpdatePercentage": 12,
@@ -55,7 +55,7 @@ Configuration includes two groups of parameters:
 * Database.Name - name of database
 * Database.Table - name of table, collection, bucket and etc.
 * Database.Addresses - list of host:port string to use in connection pool
-* Workload.Type - workload type (only DefaultWorkload is available so far)
+* Workload.Type - workload type (only Default is available so far)
 * Workload.(Create|Read|Update|Delete|Query)Percentage - CRUD-Q operations ratio, sum must be equal 100
 * Workload.Records - number of existing records(row, documents) in database before benchmark
 * Workload.Operations - total number of operations to perform, defines benchmark run time
