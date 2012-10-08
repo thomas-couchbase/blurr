@@ -39,8 +39,7 @@ func (w *Default) GenerateKeyForRemoval() string {
 
 // Generate value with deterministic indexable fields and arbitrary body
 func (w *Default) GenerateValue(key string,
-	indexableFields, size int) map[string]interface{} {
-
+		indexableFields, size int) map[string]interface{} {
 	// Hex lengh is 32 characters, so only 22 indexable fields are allowed
 	if indexableFields >= 20 {
 		log.Fatal("Too much fields! It must be less than 20")
@@ -59,8 +58,7 @@ func (w *Default) GenerateValue(key string,
 }
 
 func (w *Default) GenerateQuery(indexableFields int,
-	currentRecords int64) (string, string, int) {
-
+		currentRecords int64) (string, string, int) {
 	i := rand.Intn(indexableFields)
 	fieldName := "field" + strconv.Itoa(i)
 	fieldValue := fieldName + "-" + w.GenerateExistingKey(currentRecords)[i:i+10]
@@ -154,12 +152,11 @@ func (w *Default) DoBatch(db databases.Database, state *State) {
 
 // Continuously run batches of operations
 func (w *Default) RunWorkload(database databases.Database,
-	state *State, wg *sync.WaitGroup) {
+		state *State, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	// Calculate target time for batch execution. +Inf if not defined
-	targetBatchTimeF := float64(100) /
-		float64(w.Config.TargetThroughput)
+	targetBatchTimeF := float64(100) / float64(w.Config.TargetThroughput)
 
 	for state.Operations < w.Config.Operations {
 		// Send batch of request and measure execution time
