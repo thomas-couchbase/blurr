@@ -45,3 +45,14 @@ func Hash(inString string) string {
 	h.Write([]byte(inString))
 	return hex.EncodeToString(h.Sum(nil))
 }
+
+func RandString(key string, expectedLength int) string  {
+	var randString string
+	if expectedLength > 64 {
+		baseString := RandString(key, expectedLength / 2)
+		randString = baseString + baseString
+	} else {
+		randString = (Hash(key) + Hash(key[:len(key)-1]))[:expectedLength]
+	}
+	return randString
+}

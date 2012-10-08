@@ -1,7 +1,6 @@
 package workloads
 
 import (
-	"bytes"
 	"log"
 	"math"
 	"math/rand"
@@ -54,13 +53,8 @@ func (w *Default) GenerateValue(key string,
 	}
 	// Generate value body in order to meet value size specification
 	fieldName := "field" + strconv.Itoa(indexableFields)
-	buffer := bytes.Buffer{}
-	bodyHash := Hash(key)
-	iterations := (size - len(fieldName+"-"+key[:10])*indexableFields) / 32
-	for i := 0; i < iterations; i++ {
-		buffer.WriteString(bodyHash)
-	}
-	value[fieldName] = buffer.String()
+	expectedLength := size - len(fieldName + "-" + key[:10]) *indexableFields
+	value[fieldName] = RandString(key, expectedLength)
 	return value
 }
 
