@@ -9,12 +9,14 @@ import (
 	"github.com/pavel-paulau/blurr/workloads"
 )
 
-func main() {
-	var database databases.Database
-	var workload workloads.Workload
+var config Config
+var database databases.Database
+var workload workloads.Workload
+var state workloads.State
 
+func init() {
 	// Read configuration file
-	config := ReadConfig()
+	config = ReadConfig()
 
 	// Create driver instance
 	switch config.Database.Driver {
@@ -34,20 +36,20 @@ func main() {
 	default:
 		log.Fatal("Unsupported workload type")
 	}
-
 	// Initialize database and workload
 	database.Init(config.Database)
 
-	// Run concurrent workload
+	// Initialize benchmark state
+	state = workloads.State{}
+	state.Records = config.Workload.Records
+	state.Init()
+}
+
+func main() {
+	// Start concurrent goroutines
 	wg := sync.WaitGroup{}
 	wgStats := sync.WaitGroup{}
-	state := workloads.State{}
-	state.Records = config.Workload.Records
 
-	// Initialize benchmark events
-	state.Init()
-
-	// Start concurrent goroutines
 	state.Events["Started"] = time.Now()
 	for worker := 0; worker < config.Workload.Workers; worker++ {
 		wg.Add(1)
