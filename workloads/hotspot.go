@@ -3,7 +3,6 @@ package workloads
 import (
 	"math/rand"
 	"strconv"
-	"time"
 )
 
 type HotSpot struct {
@@ -13,10 +12,9 @@ type HotSpot struct {
 }
 
 func (w *HotSpot) GenerateExistingKey(currentRecords int64) string {
-	rand.Seed(time.Now().UnixNano())
-
 	var strRandRecord string
 	total_records := currentRecords - w.DeletedItems
+
 	if rand.Intn(100) < w.Config.HotSpotAccessPercentage {
 		randRecord := rand.Int63n(total_records * w.Config.HotDataPercentage / 100)
 		randRecord += w.DeletedItems + total_records*(100-w.Config.HotDataPercentage)/100

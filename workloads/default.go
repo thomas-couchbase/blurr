@@ -27,8 +27,6 @@ func (w *Default) GenerateNewKey(currentRecords int64) string {
 }
 
 func (w *Default) GenerateExistingKey(currentRecords int64) string {
-	rand.Seed(time.Now().UnixNano())
-
 	randRecord := w.DeletedItems + rand.Int63n(currentRecords-w.DeletedItems)
 	strRandRecord := strconv.FormatInt(randRecord, 10)
 	return Hash(strRandRecord)
@@ -92,6 +90,7 @@ func (w *Default) PrepareBatch() []string {
 }
 
 func (w *Default) DoBatch(db databases.Database, state *State) {
+	rand.Seed(time.Now().UnixNano())
 	batch := w.PrepareBatch()
 
 	for _, v := range batch {
