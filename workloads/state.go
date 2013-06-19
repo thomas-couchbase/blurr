@@ -12,9 +12,9 @@ import (
 
 type State struct {
 	Operations, Records int64
-	Errors map[string]int
-	Events map[string]time.Time
-	Latency map[string]*summstat.Stats
+	Errors              map[string]int
+	Events              map[string]time.Time
+	Latency             map[string]*summstat.Stats
 }
 
 func (state *State) Init() {
