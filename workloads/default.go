@@ -43,6 +43,8 @@ func (w *Default) GenerateValue(key string,
 	if indexableFields >= 20 {
 		log.Fatal("Too much fields! It must be less than 20")
 	}
+
+	value = map[string]interface{}{}
 	for i := 0; i < indexableFields; i++ {
 		fieldName := "field" + strconv.Itoa(i)
 		value[fieldName] = fieldName + "-" + key[i:i+10]
