@@ -38,6 +38,8 @@ type Workload interface {
 
 	GenerateQuery(indexableFields int, currentRecords int64) (fieldName, fieldValue string, limit int)
 
+	PrepareBatch() []string
+
 	DoBatch(database databases.Database, state *State)
 
 	RunWorkload(database databases.Database, state *State, wg *sync.WaitGroup)
