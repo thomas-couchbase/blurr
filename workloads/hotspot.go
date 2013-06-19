@@ -12,9 +12,9 @@ import (
 )
 
 type HotSpot struct {
-	Config       	Config
-	DeletedItems	int64
-	DefaultWorkload	*Default
+	Config          Config
+	DeletedItems    int64
+	DefaultWorkload *Default
 }
 
 // Generate new *unique* key
@@ -32,7 +32,7 @@ func (w *HotSpot) GenerateExistingKey(currentRecords int64) string {
 
 		randRecord := rand.Int63n(total_records * w.Config.HotDataPercentage / 100)
 		randRecord += w.DeletedItems +
-			total_records * (100 - w.Config.HotDataPercentage) / 100
+			total_records*(100-w.Config.HotDataPercentage)/100
 		strRandRecord := strconv.FormatInt(randRecord, 10)
 		key = Hash(strRandRecord)
 	} else {
@@ -48,7 +48,7 @@ func (w *HotSpot) GenerateKeyForRemoval() string {
 
 // Generate value with deterministic indexable fields and arbitrary body
 func (w *HotSpot) GenerateValue(key string, indexableFields,
-		size int) map[string]interface{} {
+	size int) map[string]interface{} {
 	return w.DefaultWorkload.GenerateValue(key, indexableFields, size)
 }
 
@@ -112,12 +112,12 @@ func (w *HotSpot) DoBatch(db databases.Database, state *State) {
 
 // Continuously run batches of operations
 func (w *HotSpot) RunWorkload(database databases.Database,
-state *State, wg *sync.WaitGroup) {
+	state *State, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	// Calculate target time for batch execution. +Inf if not defined
 	targetBatchTimeF := float64(100) /
-			float64(w.Config.TargetThroughput)
+		float64(w.Config.TargetThroughput)
 
 	for state.Operations < w.Config.Operations {
 		// Send batch of request and measure execution time

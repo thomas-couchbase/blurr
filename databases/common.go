@@ -1,15 +1,13 @@
 package databases
 
-
 type Config struct {
-	Driver string
-	Name string
-	Table string
+	Driver    string
+	Name      string
+	Table     string
 	Addresses []string
-	Username string
-	Password string
+	Username  string
+	Password  string
 }
-
 
 type Database interface {
 	Init(config Config)

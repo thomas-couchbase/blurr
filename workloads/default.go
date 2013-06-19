@@ -25,21 +25,21 @@ func (w *Default) GenerateNewKey(currentRecords int64) string {
 // Generate random key from current key space
 func (w *Default) GenerateExistingKey(currentRecords int64) string {
 	rand.Seed(time.Now().UnixNano())
-	randRecord := w.DeletedItems + rand.Int63n(currentRecords - w.DeletedItems)
+	randRecord := w.DeletedItems + rand.Int63n(currentRecords-w.DeletedItems)
 	strRandRecord := strconv.FormatInt(randRecord, 10)
 	return Hash(strRandRecord)
 }
 
 // Generate sequential key for removal
 func (w *Default) GenerateKeyForRemoval() string {
-	keyForRemoval := strconv.FormatInt(w.DeletedItems + 1, 10)
+	keyForRemoval := strconv.FormatInt(w.DeletedItems+1, 10)
 	w.DeletedItems++
 	return Hash(keyForRemoval)
 }
 
 // Generate value with deterministic indexable fields and arbitrary body
 func (w *Default) GenerateValue(key string,
-		indexableFields, size int) map[string]interface{} {
+	indexableFields, size int) map[string]interface{} {
 	// Hex lengh is 32 characters, so only 22 indexable fields are allowed
 	if indexableFields >= 20 {
 		log.Fatal("Too much fields! It must be less than 20")
@@ -52,13 +52,13 @@ func (w *Default) GenerateValue(key string,
 	}
 	// Generate value body in order to meet value size specification
 	fieldName := "field" + strconv.Itoa(indexableFields)
-	expectedLength := size - len(fieldName + "-" + key[:10]) *indexableFields
+	expectedLength := size - len(fieldName+"-"+key[:10])*indexableFields
 	value[fieldName] = RandString(key, expectedLength)
 	return value
 }
 
 func (w *Default) GenerateQuery(indexableFields int,
-		currentRecords int64) (string, string, int) {
+	currentRecords int64) (string, string, int) {
 	i := rand.Intn(indexableFields)
 	fieldName := "field" + strconv.Itoa(i)
 	fieldValue := fieldName + "-" + w.GenerateExistingKey(currentRecords)[i:i+10]
@@ -152,7 +152,7 @@ func (w *Default) DoBatch(db databases.Database, state *State) {
 
 // Continuously run batches of operations
 func (w *Default) RunWorkload(database databases.Database,
-		state *State, wg *sync.WaitGroup) {
+	state *State, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	// Calculate target time for batch execution. +Inf if not defined
