@@ -14,6 +14,11 @@ import (
 type Default struct {
 	Config       Config
 	DeletedItems int64
+	i            Workload
+}
+
+func (w *Default) SetImplementation(i Workload) {
+	w.i = i
 }
 
 func (w *Default) GenerateNewKey(currentRecords int64) string {
@@ -23,6 +28,7 @@ func (w *Default) GenerateNewKey(currentRecords int64) string {
 
 func (w *Default) GenerateExistingKey(currentRecords int64) string {
 	rand.Seed(time.Now().UnixNano())
+
 	randRecord := w.DeletedItems + rand.Int63n(currentRecords-w.DeletedItems)
 	strRandRecord := strconv.FormatInt(randRecord, 10)
 	return Hash(strRandRecord)
@@ -35,28 +41,25 @@ func (w *Default) GenerateKeyForRemoval() string {
 }
 
 func (w *Default) GenerateValue(key string,
-	indexableFields, size int) map[string]interface{} {
+	indexableFields, size int) (value map[string]interface{}) {
 	if indexableFields >= 20 {
 		log.Fatal("Too much fields! It must be less than 20")
 	}
-
-	value := map[string]interface{}{}
 	for i := 0; i < indexableFields; i++ {
 		fieldName := "field" + strconv.Itoa(i)
 		value[fieldName] = fieldName + "-" + key[i:i+10]
 	}
-
 	fieldName := "field" + strconv.Itoa(indexableFields)
 	expectedLength := size - len(fieldName+"-"+key[:10])*indexableFields
 	value[fieldName] = RandString(key, expectedLength)
-	return value
+	return
 }
 
 func (w *Default) GenerateQuery(indexableFields int,
 	currentRecords int64) (string, string, int) {
 	i := rand.Intn(indexableFields)
 	fieldName := "field" + strconv.Itoa(i)
-	fieldValue := fieldName + "-" + w.GenerateExistingKey(currentRecords)[i:i+10]
+	fieldValue := fieldName + "-" + w.i.GenerateExistingKey(currentRecords)[i:i+10]
 	limit := 10 + rand.Intn(10)
 	return fieldName, fieldValue, limit
 }
@@ -88,20 +91,6 @@ func (w *Default) PrepareBatch() []string {
 	return randOperations
 }
 
-func (w *Default) Something() chan string {
-	operations := w.PrepareBatch()
-
-	ch := make(chan string, 100000)
-
-	go func() {
-		for {
-			ch <- operations[rand.Intn(100)]
-		}
-	}()
-
-	return ch
-}
-
 func (w *Default) DoBatch(db databases.Database, state *State) {
 	batch := w.PrepareBatch()
 
@@ -117,10 +106,10 @@ func (w *Default) DoBatch(db databases.Database, state *State) {
 					w.Config.IndexableFields, w.Config.ValueSize)
 				err = db.Create(key, value)
 			case "r":
-				key := w.GenerateExistingKey(state.Records)
+				key := w.i.GenerateExistingKey(state.Records)
 				err = db.Read(key)
 			case "u":
-				key := w.GenerateExistingKey(state.Records)
+				key := w.i.GenerateExistingKey(state.Records)
 				value := w.GenerateValue(key,
 					w.Config.IndexableFields, w.Config.ValueSize)
 				err = db.Update(key, value)
@@ -148,7 +137,7 @@ func (w *Default) RunWorkload(database databases.Database,
 
 	for state.Operations < w.Config.Operations {
 		t0 := time.Now()
-		w.DoBatch(database, state)
+		w.i.DoBatch(database, state)
 		t1 := time.Now()
 
 		if !math.IsInf(targetBatchTimeF, 0) {

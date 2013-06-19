@@ -31,10 +31,11 @@ func init() {
 		workload = &workloads.Default{Config: config.Workload}
 	case "HotSpot":
 		workload = &workloads.HotSpot{Config: config.Workload,
-			DefaultWorkload: &workloads.Default{Config: config.Workload}}
+			Default: workloads.Default{Config: config.Workload}}
 	default:
 		log.Fatal("Unsupported workload")
 	}
+	workload.SetImplementation(workload)
 
 	database.Init(config.Database)
 

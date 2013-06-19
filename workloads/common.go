@@ -26,6 +26,8 @@ type Config struct {
 }
 
 type Workload interface {
+	SetImplementation(i Workload)
+
 	GenerateNewKey(currentRecords int64) string
 
 	GenerateExistingKey(currentRecords int64) string
@@ -35,6 +37,8 @@ type Workload interface {
 	GenerateValue(key string, indexableFields, size int) map[string]interface{}
 
 	GenerateQuery(indexableFields int, currentRecords int64) (fieldName, fieldValue string, limit int)
+
+	DoBatch(database databases.Database, state *State)
 
 	RunWorkload(database databases.Database, state *State, wg *sync.WaitGroup)
 }
