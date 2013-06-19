@@ -16,13 +16,11 @@ type Default struct {
 	DeletedItems int64
 }
 
-// Generate new *unique* key
 func (w *Default) GenerateNewKey(currentRecords int64) string {
 	strCurrentRecords := strconv.FormatInt(currentRecords, 10)
 	return Hash(strCurrentRecords)
 }
 
-// Generate random key from current key space
 func (w *Default) GenerateExistingKey(currentRecords int64) string {
 	rand.Seed(time.Now().UnixNano())
 	randRecord := w.DeletedItems + rand.Int63n(currentRecords-w.DeletedItems)
@@ -30,27 +28,24 @@ func (w *Default) GenerateExistingKey(currentRecords int64) string {
 	return Hash(strRandRecord)
 }
 
-// Generate sequential key for removal
 func (w *Default) GenerateKeyForRemoval() string {
 	keyForRemoval := strconv.FormatInt(w.DeletedItems+1, 10)
 	w.DeletedItems++
 	return Hash(keyForRemoval)
 }
 
-// Generate value with deterministic indexable fields and arbitrary body
 func (w *Default) GenerateValue(key string,
 	indexableFields, size int) map[string]interface{} {
-	// Hex lengh is 32 characters, so only 22 indexable fields are allowed
 	if indexableFields >= 20 {
 		log.Fatal("Too much fields! It must be less than 20")
 	}
-	// Gererate indexable fields (shifting over key name)
+
 	value := map[string]interface{}{}
 	for i := 0; i < indexableFields; i++ {
 		fieldName := "field" + strconv.Itoa(i)
 		value[fieldName] = fieldName + "-" + key[i:i+10]
 	}
-	// Generate value body in order to meet value size specification
+
 	fieldName := "field" + strconv.Itoa(indexableFields)
 	expectedLength := size - len(fieldName+"-"+key[:10])*indexableFields
 	value[fieldName] = RandString(key, expectedLength)
@@ -66,7 +61,6 @@ func (w *Default) GenerateQuery(indexableFields int,
 	return fieldName, fieldValue, limit
 }
 
-// Generate slice of shuffled characters (CRUD-Q shorthands)
 func (w *Default) PrepareBatch() []string {
 	operations := make([]string, 0, 100)
 	randOperations := make([]string, 100, 100)
@@ -108,14 +102,10 @@ func (w *Default) Something() chan string {
 	return ch
 }
 
-// Sequentially send 100 requests
 func (w *Default) DoBatch(db databases.Database, state *State) {
 	batch := w.PrepareBatch()
 
 	for _, v := range batch {
-		// Increase number of passed operarions *before* batch
-		// execution in order to normally share key space with
-		// other workers
 		if state.Operations < w.Config.Operations {
 			var err error
 			state.Operations++
@@ -150,21 +140,17 @@ func (w *Default) DoBatch(db databases.Database, state *State) {
 	}
 }
 
-// Continuously run batches of operations
 func (w *Default) RunWorkload(database databases.Database,
 	state *State, wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	// Calculate target time for batch execution. +Inf if not defined
 	targetBatchTimeF := float64(100) / float64(w.Config.TargetThroughput)
 
 	for state.Operations < w.Config.Operations {
-		// Send batch of request and measure execution time
 		t0 := time.Now()
 		w.DoBatch(database, state)
 		t1 := time.Now()
 
-		// Sleep if necessary
 		if !math.IsInf(targetBatchTimeF, 0) {
 			targetBatchTime := time.Duration(targetBatchTimeF * math.Pow10(9))
 			actualBatchTime := t1.Sub(t0)

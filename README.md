@@ -16,11 +16,12 @@ Installation
 
 Usage
 -----
-    blurr -workload=workloads/workload.conf
 
+    blurr -workload=workloads/workload.conf
 
 Configuration files
 -------------------
+
 blurr uses JSON format for configuration. Example is below:
 
     {

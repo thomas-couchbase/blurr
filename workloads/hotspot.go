@@ -1,4 +1,3 @@
-// TODO: fix stupid code copy-paste
 package workloads
 
 import (
@@ -17,12 +16,10 @@ type HotSpot struct {
 	DefaultWorkload *Default
 }
 
-// Generate new *unique* key
 func (w *HotSpot) GenerateNewKey(currentRecords int64) string {
 	return w.DefaultWorkload.GenerateNewKey(currentRecords)
 }
 
-// Generate hot or load key from current key space
 func (w *HotSpot) GenerateExistingKey(currentRecords int64) string {
 	var key string
 	rand.Seed(time.Now().UnixNano())
@@ -41,18 +38,15 @@ func (w *HotSpot) GenerateExistingKey(currentRecords int64) string {
 	return key
 }
 
-// Generate sequential key for removal
 func (w *HotSpot) GenerateKeyForRemoval() string {
 	return w.DefaultWorkload.GenerateKeyForRemoval()
 }
 
-// Generate value with deterministic indexable fields and arbitrary body
 func (w *HotSpot) GenerateValue(key string, indexableFields,
 	size int) map[string]interface{} {
 	return w.DefaultWorkload.GenerateValue(key, indexableFields, size)
 }
 
-// Generate query on secondary index
 func (w *HotSpot) GenerateQuery(indexableFields int,
 	currentRecords int64) (string, string, int) {
 
@@ -63,19 +57,14 @@ func (w *HotSpot) GenerateQuery(indexableFields int,
 	return fieldName, fieldValue, limit
 }
 
-// Generate slice of shuffled characters (CRUD-Q shorthands)
 func (w *HotSpot) PrepareBatch() []string {
 	return w.DefaultWorkload.PrepareBatch()
 }
 
-// Sequentially send 100 requests
 func (w *HotSpot) DoBatch(db databases.Database, state *State) {
 	batch := w.PrepareBatch()
 
 	for _, v := range batch {
-		// Increase number of passed operarions *before* batch
-		// execution in order to normally share key space with
-		// other workers
 		if state.Operations < w.Config.Operations {
 			var err error
 			state.Operations++
@@ -110,22 +99,18 @@ func (w *HotSpot) DoBatch(db databases.Database, state *State) {
 	}
 }
 
-// Continuously run batches of operations
 func (w *HotSpot) RunWorkload(database databases.Database,
 	state *State, wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	// Calculate target time for batch execution. +Inf if not defined
 	targetBatchTimeF := float64(100) /
 		float64(w.Config.TargetThroughput)
 
 	for state.Operations < w.Config.Operations {
-		// Send batch of request and measure execution time
 		t0 := time.Now()
 		w.DoBatch(database, state)
 		t1 := time.Now()
 
-		// Sleep if necessary
 		if !math.IsInf(targetBatchTimeF, 0) {
 			targetBatchTime := time.Duration(targetBatchTimeF * math.Pow10(9))
 			actualBatchTime := t1.Sub(t0)

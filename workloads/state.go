@@ -10,15 +10,10 @@ import (
 	"github.com/pavel-paulau/blurr/databases"
 )
 
-// Type to store benchmark state
 type State struct {
-	// operations done and total number of records in database
 	Operations, Records int64
-	// total errors by operation type
 	Errors map[string]int
-	// runtime events ("Started", "Finished", and etc.)
 	Events map[string]time.Time
-	// latency arrays per request type
 	Latency map[string]*summstat.Stats
 }
 
@@ -33,7 +28,6 @@ func (state *State) Init() {
 	state.Latency["Query"] = summstat.NewStats()
 }
 
-// Report average throughput and overall progress every 10 seconds
 func (state *State) ReportThroughput(config Config, wg *sync.WaitGroup) {
 	defer wg.Done()
 	opsDone := int64(0)
@@ -102,7 +96,6 @@ func (state *State) MeasureLatency(database databases.Database,
 	}
 }
 
-// Report final summary: errors and elapsed time
 func (state *State) ReportSummary() {
 	for _, op := range []string{"Create", "Read", "Update", "Delete", "Query"} {
 		if state.Latency[op].Count() > 0 {

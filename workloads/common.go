@@ -8,7 +8,6 @@ import (
 	"github.com/pavel-paulau/blurr/databases"
 )
 
-// General workload configuration
 type Config struct {
 	Type                    string
 	CreatePercentage        int // shorthand "c"

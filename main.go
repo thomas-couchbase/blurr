@@ -15,18 +15,17 @@ var workload workloads.Workload
 var state workloads.State
 
 func init() {
-	// Read configuration file
 	config = ReadConfig()
 
-	// Create driver instance
 	switch config.Database.Driver {
 	case "MongoDB":
 		database = &databases.MongoDB{}
 	case "Couchbase":
 		database = &databases.Couchbase{}
 	default:
-		log.Fatal("Unsupported competitor")
+		log.Fatal("Unsupported driver")
 	}
+
 	switch config.Workload.Type {
 	case "Default":
 		workload = &workloads.Default{Config: config.Workload}
@@ -34,19 +33,17 @@ func init() {
 		workload = &workloads.HotSpot{Config: config.Workload,
 			DefaultWorkload: &workloads.Default{Config: config.Workload}}
 	default:
-		log.Fatal("Unsupported workload type")
+		log.Fatal("Unsupported workload")
 	}
-	// Initialize database and workload
+
 	database.Init(config.Database)
 
-	// Initialize benchmark state
 	state = workloads.State{}
 	state.Records = config.Workload.Records
 	state.Init()
 }
 
 func main() {
-	// Start concurrent goroutines
 	wg := sync.WaitGroup{}
 	wgStats := sync.WaitGroup{}
 
@@ -55,7 +52,7 @@ func main() {
 		wg.Add(1)
 		go workload.RunWorkload(database, &state, &wg)
 	}
-	// Continuously report performance stats
+
 	wgStats.Add(2)
 	go state.ReportThroughput(config.Workload, &wgStats)
 	go state.MeasureLatency(database, workload, config.Workload, &wgStats)
@@ -64,7 +61,6 @@ func main() {
 	state.Events["Finished"] = time.Now()
 	wgStats.Wait()
 
-	// Close active connections (if any) and report final summary
 	database.Shutdown()
 	state.ReportSummary()
 }
