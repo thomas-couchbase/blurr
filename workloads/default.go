@@ -89,9 +89,8 @@ func (w *Default) PrepareBatch() []string {
 
 func (w *Default) DoBatch(db databases.Database, state *State) {
 	rand.Seed(time.Now().UnixNano())
-	batch := w.PrepareBatch()
 
-	for _, v := range batch {
+	for _, v := range w.PrepareBatch() {
 		if state.Operations < w.Config.Operations {
 			var err error
 			state.Operations++

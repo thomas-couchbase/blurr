@@ -20,11 +20,12 @@ type State struct {
 func (state *State) Init() {
 	state.Errors = map[string]int{}
 	state.Events = map[string]time.Time{}
-	state.Latency = map[string]*summstat.Stats{}
-	state.Latency["Create"] = summstat.NewStats()
-	state.Latency["Read"] = summstat.NewStats()
-	state.Latency["Update"] = summstat.NewStats()
-	state.Latency["Delete"] = summstat.NewStats()
+	state.Latency = map[string]*summstat.Stats{
+		"Create": summstat.NewStats(),
+		"Read": summstat.NewStats(),
+		"Update": summstat.NewStats(),
+		"Delete": summstat.NewStats(),
+	}
 }
 
 func (state *State) ReportThroughput(config Config, wg *sync.WaitGroup) {
@@ -96,7 +97,6 @@ func (state *State) ReportSummary() {
 			}
 			mean := time.Duration(state.Latency[op].Mean())
 			fmt.Printf("\tMean: %v\n", mean)
-
 		}
 	}
 	if len(state.Errors) > 0 {

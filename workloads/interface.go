@@ -8,10 +8,10 @@ import (
 
 type Config struct {
 	Type                    string
-	CreatePercentage        int // shorthand "c"
-	ReadPercentage          int // shorthand "r"
-	UpdatePercentage        int // shorthand "u"
-	DeletePercentage        int // shorthand "d"
+	CreatePercentage        int
+	ReadPercentage          int
+	UpdatePercentage        int
+	DeletePercentage        int
 	Records                 int64
 	Operations              int64
 	ValueSize               int
