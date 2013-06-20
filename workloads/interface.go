@@ -34,7 +34,9 @@ type Workload interface {
 
 	PrepareBatch() []string
 
-	DoBatch(database databases.Database, state *State)
+	PrepareSeq(size int64) chan string
+
+	DoBatch(database databases.Database, state *State, seq chan string)
 
 	RunWorkload(database databases.Database, state *State, wg *sync.WaitGroup)
 }

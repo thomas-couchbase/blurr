@@ -13,6 +13,8 @@ import (
 	"github.com/pavel-paulau/blurr/databases"
 )
 
+const BatchSize int = 100
+
 type Default struct {
 	Config       Config
 	DeletedItems int64
@@ -64,8 +66,7 @@ func (w *Default) GenerateValue(key string, size int) map[string]interface{} {
 }
 
 func (w *Default) PrepareBatch() []string {
-	operations := make([]string, 0, 100)
-	randOperations := make([]string, 100, 100)
+	operations := make([]string, 0, BatchSize)
 	for i := 0; i < w.Config.CreatePercentage; i++ {
 		operations = append(operations, "c")
 	}
@@ -78,23 +79,32 @@ func (w *Default) PrepareBatch() []string {
 	for i := 0; i < w.Config.DeletePercentage; i++ {
 		operations = append(operations, "d")
 	}
-	if len(operations) != 100 {
+	if len(operations) != BatchSize {
 		log.Fatal("Wrong workload configuration: sum of percentages is not equal 100")
 	}
-	for i, randI := range rand.Perm(100) {
-		randOperations[i] = operations[randI]
-	}
-	return randOperations
+	return operations
 }
 
-func (w *Default) DoBatch(db databases.Database, state *State) {
-	rand.Seed(time.Now().UnixNano())
+func (w *Default) PrepareSeq(size int64) chan string {
+	operations := w.PrepareBatch()
+	seq := make(chan string, BatchSize)
+	go func () {
+		for i := int64(0); i < size; i += int64(BatchSize) {
+			for _, randI := range rand.Perm(BatchSize) {
+				seq <- operations[randI]
+			}
+		}
+	}()
+	return seq
+}
 
-	for _, v := range w.PrepareBatch() {
+func (w *Default) DoBatch(db databases.Database, state *State, seq chan string) {
+	for i := 0; i < BatchSize; i++ {
+		op := <-seq
 		if state.Operations < w.Config.Operations {
 			var err error
 			state.Operations++
-			switch v {
+			switch op {
 			case "c":
 				state.Records++
 				key := w.GenerateNewKey(state.Records)
@@ -112,7 +122,7 @@ func (w *Default) DoBatch(db databases.Database, state *State) {
 				err = db.Delete(key)
 			}
 			if err != nil {
-				state.Errors[v]++
+				state.Errors[op]++
 				state.Errors["total"]++
 			}
 		}
@@ -123,11 +133,14 @@ func (w *Default) RunWorkload(database databases.Database,
 	state *State, wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	targetBatchTimeF := float64(100) / float64(w.Config.TargetThroughput)
+	rand.Seed(time.Now().UnixNano())
+	seq := w.PrepareSeq(w.Config.Operations)
+
+	targetBatchTimeF := float64(BatchSize) / float64(w.Config.TargetThroughput)
 
 	for state.Operations < w.Config.Operations {
 		t0 := time.Now()
-		w.i.DoBatch(database, state)
+		w.i.DoBatch(database, state, seq)
 		t1 := time.Now()
 
 		if !math.IsInf(targetBatchTimeF, 0) {
