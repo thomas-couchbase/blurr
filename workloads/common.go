@@ -14,11 +14,9 @@ type Config struct {
 	ReadPercentage          int // shorthand "r"
 	UpdatePercentage        int // shorthand "u"
 	DeletePercentage        int // shorthand "d"
-	QueryPercentage         int // shorthand "q"
 	Records                 int64
 	Operations              int64
 	ValueSize               int
-	IndexableFields         int
 	Workers                 int
 	TargetThroughput        int
 	HotDataPercentage       int64
@@ -34,9 +32,7 @@ type Workload interface {
 
 	GenerateKeyForRemoval() string
 
-	GenerateValue(key string, indexableFields, size int) map[string]interface{}
-
-	GenerateQuery(indexableFields int, currentRecords int64) (fieldName, fieldValue string, limit int)
+	GenerateValue(key string, size int) map[string]interface{}
 
 	PrepareBatch() []string
 

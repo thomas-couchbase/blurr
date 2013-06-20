@@ -25,7 +25,6 @@ func (state *State) Init() {
 	state.Latency["Read"] = summstat.NewStats()
 	state.Latency["Update"] = summstat.NewStats()
 	state.Latency["Delete"] = summstat.NewStats()
-	state.Latency["Query"] = summstat.NewStats()
 }
 
 func (state *State) ReportThroughput(config Config, wg *sync.WaitGroup) {
@@ -52,7 +51,7 @@ func (state *State) MeasureLatency(database databases.Database,
 			state.Operations++
 			state.Records++
 			key := workload.GenerateNewKey(state.Records)
-			value := workload.GenerateValue(key, config.IndexableFields, config.ValueSize)
+			value := workload.GenerateValue(key, config.ValueSize)
 			t0 := time.Now()
 			database.Create(key, value)
 			t1 := time.Now()
@@ -69,7 +68,7 @@ func (state *State) MeasureLatency(database databases.Database,
 		if config.UpdatePercentage > 0 {
 			state.Operations++
 			key := workload.GenerateExistingKey(state.Records)
-			value := workload.GenerateValue(key, config.IndexableFields, config.ValueSize)
+			value := workload.GenerateValue(key, config.ValueSize)
 			t0 := time.Now()
 			database.Update(key, value)
 			t1 := time.Now()
@@ -83,21 +82,12 @@ func (state *State) MeasureLatency(database databases.Database,
 			t1 := time.Now()
 			state.Latency["Delete"].AddSample(summstat.Sample(t1.Sub(t0)))
 		}
-		if config.QueryPercentage > 0 {
-			state.Operations++
-			fieldName, fieldValue, limit := workload.GenerateQuery(config.IndexableFields,
-				state.Records)
-			t0 := time.Now()
-			database.Query(fieldName, fieldValue, limit)
-			t1 := time.Now()
-			state.Latency["Query"].AddSample(summstat.Sample(t1.Sub(t0)))
-		}
 		time.Sleep(time.Second)
 	}
 }
 
 func (state *State) ReportSummary() {
-	for _, op := range []string{"Create", "Read", "Update", "Delete", "Query"} {
+	for _, op := range []string{"Create", "Read", "Update", "Delete"} {
 		if state.Latency[op].Count() > 0 {
 			fmt.Printf("%v latency:\n", op)
 			perc80th := time.Duration(state.Latency[op].Percentile(0.8))
@@ -116,7 +106,6 @@ func (state *State) ReportSummary() {
 		fmt.Printf("\tRead   : %v\n", state.Errors["r"])
 		fmt.Printf("\tUpdate : %v\n", state.Errors["u"])
 		fmt.Printf("\tDelete : %v\n", state.Errors["d"])
-		fmt.Printf("\tQuery  : %v\n", state.Errors["q"])
 		fmt.Printf("\tTotal  : %v\n", state.Errors["total"])
 	}
 	fmt.Printf("Time elapsed:\n\t%v\n",

@@ -42,7 +42,3 @@ func (cb *Couchbase) Delete(key string) error {
 	err := cb.Bucket.Delete(key)
 	return err
 }
-
-func (cb *Couchbase) Query(fieldName, fieldValue string, limit int) error {
-	return nil //TODO: implement
-}

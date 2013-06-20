@@ -49,10 +49,3 @@ func (mongo *MongoDB) Delete(key string) error {
 	err := mongo.Collection.Remove(bson.M{"_id": key})
 	return err
 }
-
-func (mongo *MongoDB) Query(fieldName, fieldValue string, limit int) error {
-	var result []map[string]interface{}
-	err := mongo.Collection.Find(bson.M{fieldName: bson.M{"$gte": fieldValue}}).
-		Limit(limit).Iter().All(&result)
-	return err
-}

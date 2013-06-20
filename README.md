@@ -39,13 +39,11 @@ blurr uses JSON format for configuration. Example is below:
             "Type": "Default",
             "CreatePercentage": 4,
             "ReadPercentage": 60,
-            "UpdatePercentage": 12,
+            "UpdatePercentage": 32,
             "DeletePercentage": 4,
-            "QueryPercentage": 20,
             "Records": 100000,
             "Operations": 100000,
             "ValueSize": 2048,
-            "IndexableFields": 9,
             "Workers": 16,
             "TargetThroughput": 2000,
             "HotDataPercentage": 20,
@@ -59,11 +57,10 @@ Configuration includes two groups of parameters:
 * Database.Table - name of table, collection, bucket and etc.
 * Database.Addresses - list of host:port string to use in connection pool
 * Workload.Type - workload type (Default or HotSpot)
-* Workload.(Create|Read|Update|Delete|Query)Percentage - CRUD-Q operations ratio, sum must be equal 100
+* Workload.(Create|Read|Update|Delete)Percentage - CRUD operations ratio, sum must be equal 100
 * Workload.Records - number of existing records(row, documents) in database before benchmark
 * Workload.Operations - total number of operations to perform, defines benchmark run time
 * Workload.ValueSize - total size of synthetic values
-* Workload.IndexableFields - number of fields that must support secondary indexes (basically they have deterministic values)
 * Workload.Workers - number of concurrent workers (threads, clients, and etc.)
 * Workload.TargetThroughput - enable limited throughput if provided
 * Workload.HotDataPercentage - percentage of hot records in dataset

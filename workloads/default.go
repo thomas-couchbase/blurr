@@ -38,30 +38,10 @@ func (w *Default) GenerateKeyForRemoval() string {
 	return Hash(keyForRemoval)
 }
 
-func (w *Default) GenerateValue(key string,
-	indexableFields, size int) (value map[string]interface{}) {
-	if indexableFields >= 20 {
-		log.Fatal("Too much fields! It must be less than 20")
+func (w *Default) GenerateValue(key string, size int) map[string]interface{} {
+	return map[string]interface{}{
+		key: RandString(key, size),
 	}
-
-	value = map[string]interface{}{}
-	for i := 0; i < indexableFields; i++ {
-		fieldName := "field" + strconv.Itoa(i)
-		value[fieldName] = fieldName + "-" + key[i:i+10]
-	}
-	fieldName := "field" + strconv.Itoa(indexableFields)
-	expectedLength := size - len(fieldName+"-"+key[:10])*indexableFields
-	value[fieldName] = RandString(key, expectedLength)
-	return
-}
-
-func (w *Default) GenerateQuery(indexableFields int,
-	currentRecords int64) (string, string, int) {
-	i := rand.Intn(indexableFields)
-	fieldName := "field" + strconv.Itoa(i)
-	fieldValue := fieldName + "-" + w.i.GenerateExistingKey(currentRecords)[i:i+10]
-	limit := 10 + rand.Intn(10)
-	return fieldName, fieldValue, limit
 }
 
 func (w *Default) PrepareBatch() []string {
@@ -78,9 +58,6 @@ func (w *Default) PrepareBatch() []string {
 	}
 	for i := 0; i < w.Config.DeletePercentage; i++ {
 		operations = append(operations, "d")
-	}
-	for i := 0; i < w.Config.QueryPercentage; i++ {
-		operations = append(operations, "q")
 	}
 	if len(operations) != 100 {
 		log.Fatal("Wrong workload configuration: sum of percentages is not equal 100")
@@ -103,24 +80,18 @@ func (w *Default) DoBatch(db databases.Database, state *State) {
 			case "c":
 				state.Records++
 				key := w.GenerateNewKey(state.Records)
-				value := w.GenerateValue(key,
-					w.Config.IndexableFields, w.Config.ValueSize)
+				value := w.GenerateValue(key, w.Config.ValueSize)
 				err = db.Create(key, value)
 			case "r":
 				key := w.i.GenerateExistingKey(state.Records)
 				err = db.Read(key)
 			case "u":
 				key := w.i.GenerateExistingKey(state.Records)
-				value := w.GenerateValue(key,
-					w.Config.IndexableFields, w.Config.ValueSize)
+				value := w.GenerateValue(key, w.Config.ValueSize)
 				err = db.Update(key, value)
 			case "d":
 				key := w.GenerateKeyForRemoval()
 				err = db.Delete(key)
-			case "q":
-				fieldName, fieldValue, limit := w.GenerateQuery(
-					w.Config.IndexableFields, state.Records)
-				err = db.Query(fieldName, fieldValue, limit)
 			}
 			if err != nil {
 				state.Errors[v]++
