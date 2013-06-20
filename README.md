@@ -22,7 +22,7 @@ Usage
 Configuration files
 -------------------
 
-blurr uses JSON format for configuration. Example is below:
+blurr uses JSON format for configuration. There are two groups of parameters, example is below:
 
     {
         "Database": {
@@ -51,17 +51,16 @@ blurr uses JSON format for configuration. Example is below:
         }
     }
 
-Configuration includes two groups of parameters:
-* Database.Driver - database driver for benchmark
+* Database.Driver - database driver for benchmark (MongoDB or Couchbase)
 * Database.Name - name of database
 * Database.Table - name of table, collection, bucket and etc.
 * Database.Addresses - list of host:port string to use in connection pool
 * Workload.Type - workload type (Default or HotSpot)
 * Workload.(Create|Read|Update|Delete)Percentage - CRUD operations ratio, sum must be equal 100
-* Workload.Records - number of existing records(row, documents) in database before benchmark
+* Workload.Records - number of existing records(rows, documents) in database before benchmark
 * Workload.Operations - total number of operations to perform, defines benchmark run time
-* Workload.ValueSize - total size of synthetic values
+* Workload.ValueSize - size of synthetic values
 * Workload.Workers - number of concurrent workers (threads, clients, and etc.)
 * Workload.TargetThroughput - enable limited throughput if provided
-* Workload.HotDataPercentage - percentage of hot records in dataset
-* Workload.HotSpotAccessPercentage - percentage of operations that hit hot subset
+* Workload.HotDataPercentage - percentage of hot records in dataset (HotSpot workload)
+* Workload.HotSpotAccessPercentage - percentage of operations that hit hot subset (HotSpot workload)
