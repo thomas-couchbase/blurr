@@ -90,14 +90,13 @@ func (state *State) ReportSummary() {
 	for _, op := range []string{"Create", "Read", "Update", "Delete"} {
 		if state.Latency[op].Count() > 0 {
 			fmt.Printf("%v latency:\n", op)
-			perc80th := time.Duration(state.Latency[op].Percentile(0.8))
-			perc90th := time.Duration(state.Latency[op].Percentile(0.9))
-			perc95th := time.Duration(state.Latency[op].Percentile(0.95))
+			for _, percentile := range []float64{0.8, 0.9, 0.95, 0.99} {
+				value := time.Duration(state.Latency[op].Percentile(percentile))
+				fmt.Printf("\t%vth percentile: %v\n", percentile*100, value)
+			}
 			mean := time.Duration(state.Latency[op].Mean())
-			fmt.Printf("\t80th percentile: %v\n", perc80th)
-			fmt.Printf("\t90th percentile: %v\n", perc90th)
-			fmt.Printf("\t95th percentile: %v\n", perc95th)
 			fmt.Printf("\tMean: %v\n", mean)
+
 		}
 	}
 	if len(state.Errors) > 0 {
