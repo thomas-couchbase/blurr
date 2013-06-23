@@ -48,14 +48,15 @@ func (w *Default) GenerateNewKey(currentRecords int64) string {
 }
 
 func (w *Default) GenerateExistingKey(currentRecords int64) string {
-	randRecord := w.DeletedItems + rand.Int63n(currentRecords-w.DeletedItems)
+	randRecord := 1 + rand.Int63n(currentRecords-w.DeletedItems)
+	randRecord += w.DeletedItems
 	strRandRecord := strconv.FormatInt(randRecord, 10)
 	return Hash(strRandRecord)
 }
 
 func (w *Default) GenerateKeyForRemoval() string {
-	keyForRemoval := strconv.FormatInt(w.DeletedItems+1, 10)
 	w.DeletedItems++
+	keyForRemoval := strconv.FormatInt(w.DeletedItems, 10)
 	return Hash(keyForRemoval)
 }
 
@@ -88,7 +89,7 @@ func (w *Default) PrepareBatch() []string {
 func (w *Default) PrepareSeq(size int64) chan string {
 	operations := w.PrepareBatch()
 	seq := make(chan string, BatchSize)
-	go func () {
+	go func() {
 		for i := int64(0); i < size; i += int64(BatchSize) {
 			for _, randI := range rand.Perm(BatchSize) {
 				seq <- operations[randI]

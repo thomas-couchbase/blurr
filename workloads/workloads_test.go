@@ -11,6 +11,25 @@ var config = Config{
 	ReadPercentage:   25,
 	UpdatePercentage: 25,
 	DeletePercentage: 25,
+	Records:          1,
+}
+
+func TestExistingKeyDefault(t *testing.T) {
+	workload := &Default{Config: config}
+	existing := workload.GenerateExistingKey(config.Records)
+	for_removal := workload.GenerateKeyForRemoval()
+	if existing != for_removal {
+		t.Errorf("%q != %q", existing, for_removal)
+	}
+}
+
+func TestExistingKeyHot(t *testing.T) {
+	workload := &HotSpot{Config: config}
+	existing := workload.GenerateExistingKey(config.Records)
+	for_removal := workload.GenerateKeyForRemoval()
+	if existing != for_removal {
+		t.Errorf("%q != %q", existing, for_removal)
+	}
 }
 
 func BenchmarkDefaultExistingKeyGen(b *testing.B) {
