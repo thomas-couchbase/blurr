@@ -14,21 +14,14 @@ var config = Config{
 	Records:          1,
 }
 
-func TestExistingKeyDefault(t *testing.T) {
-	workload := &Default{Config: config}
-	existing := workload.GenerateExistingKey(config.Records)
-	for_removal := workload.GenerateKeyForRemoval()
-	if existing != for_removal {
-		t.Errorf("%q != %q", existing, for_removal)
-	}
-}
-
-func TestExistingKeyHot(t *testing.T) {
-	workload := &HotSpot{Config: config}
-	existing := workload.GenerateExistingKey(config.Records)
-	for_removal := workload.GenerateKeyForRemoval()
-	if existing != for_removal {
-		t.Errorf("%q != %q", existing, for_removal)
+func TestExistingKey(t *testing.T) {
+	workloads := []Workload{&Default{Config: config}, &HotSpot{Config: config}}
+	for _, workload := range workloads {
+		existing := workload.GenerateExistingKey(config.Records)
+		for_removal := workload.GenerateKeyForRemoval()
+		if existing != for_removal {
+			t.Errorf("%s != %s", existing, for_removal)
+		}
 	}
 }
 
