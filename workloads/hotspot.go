@@ -12,13 +12,14 @@ type HotSpot struct {
 }
 
 func (w *HotSpot) GenerateExistingKey(currentRecords int64) string {
-	randRecord := w.DeletedItems
+	var randRecord int64
 	total_records := currentRecords - w.DeletedItems
+	hot_records := total_records * w.Config.HotDataPercentage / 100
+	cold_records := total_records - hot_records
 	if rand.Intn(100) < w.Config.HotSpotAccessPercentage {
-		randRecord += 1 + rand.Int63n(total_records*w.Config.HotDataPercentage/100)
-		randRecord += total_records * (100 - w.Config.HotDataPercentage) / 100
+		randRecord = 1 + w.DeletedItems + cold_records + rand.Int63n(hot_records)
 	} else {
-		randRecord += 1 + rand.Int63n(total_records)
+		randRecord = 1 + w.DeletedItems + rand.Int63n(cold_records)
 	}
 	strRandRecord := strconv.FormatInt(randRecord, 10)
 	return Hash(strRandRecord)
