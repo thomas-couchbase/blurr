@@ -22,6 +22,8 @@ func init() {
 		database = &databases.MongoDB{}
 	case "Couchbase":
 		database = &databases.Couchbase{}
+	case "Cassandra":
+		database = &databases.Cassandra{}
 	default:
 		log.Fatal("Unsupported driver")
 	}

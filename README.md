@@ -51,7 +51,7 @@ blurr uses JSON format for configuration. There are two groups of parameters, ex
         }
     }
 
-* Database.Driver - database driver for benchmark (MongoDB or Couchbase)
+* Database.Driver - database driver for benchmark (MongoDB, Couchbase or Cassandra)
 * Database.Name - name of database
 * Database.Table - name of table, collection, bucket and etc.
 * Database.Addresses - list of host:port string to use in connection pool
