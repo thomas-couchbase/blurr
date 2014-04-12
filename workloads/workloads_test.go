@@ -1,6 +1,7 @@
 package workloads
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -21,6 +22,35 @@ func TestExistingKey(t *testing.T) {
 		for_removal := workload.GenerateKeyForRemoval()
 		if existing != for_removal {
 			t.Errorf("%s != %s", existing, for_removal)
+		}
+	}
+}
+
+func TestN1QLDoc(t *testing.T) {
+	workload := N1QL{Config: config}
+	new_doc := workload.GenerateValue("000000000020", 0)
+
+	expected_doc := map[string]interface{}{
+		"category":     int16(1),
+		"city":         "90ac48",
+		"coins":        213.54,
+		"country":      "1811db",
+		"county":       "40efd6",
+		"email":        "3d13c6@a2d1f3.com",
+		"full_state":   "Montana",
+		"name":         "ecdb3e e921c9",
+		"realm":        "15e3f5",
+		"state":        "WY",
+		"street":       "400f1d0a",
+		"year":         int16(1989),
+		"achievements": []int16{0, 135, 92},
+		"gmtime":       []int16{1972, 3, 3, 0, 0, 0, 4, 63, 0},
+	}
+
+	for k, v := range expected_doc {
+		eq := reflect.DeepEqual(v, new_doc[k])
+		if !eq {
+			t.Errorf("%s: %T(%v) != %T(%v)", k, v, v, new_doc[k], new_doc[k])
 		}
 	}
 }

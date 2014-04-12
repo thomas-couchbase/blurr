@@ -108,8 +108,8 @@ func (w *Default) DoBatch(db databases.Database, state *State, seq chan string) 
 			switch op {
 			case "c":
 				state.Records++
-				key := w.GenerateNewKey(state.Records)
-				value := w.GenerateValue(key, w.Config.ValueSize)
+				key := w.i.GenerateNewKey(state.Records)
+				value := w.i.GenerateValue(key, w.Config.ValueSize)
 				err = db.Create(key, value)
 			case "r":
 				key := w.i.GenerateExistingKey(state.Records)
@@ -119,7 +119,7 @@ func (w *Default) DoBatch(db databases.Database, state *State, seq chan string) 
 				value := w.GenerateValue(key, w.Config.ValueSize)
 				err = db.Update(key, value)
 			case "d":
-				key := w.GenerateKeyForRemoval()
+				key := w.i.GenerateKeyForRemoval()
 				err = db.Delete(key)
 			}
 			if err != nil {

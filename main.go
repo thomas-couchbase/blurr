@@ -34,6 +34,9 @@ func init() {
 	case "HotSpot":
 		workload = &workloads.HotSpot{Config: config.Workload,
 			Default: workloads.Default{Config: config.Workload}}
+	case "N1QL":
+		workload = &workloads.N1QL{Config: config.Workload,
+			Default: workloads.Default{Config: config.Workload}}
 	default:
 		log.Fatal("Unsupported workload")
 	}
