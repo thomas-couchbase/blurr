@@ -66,6 +66,10 @@ func (w *Default) GenerateValue(key string, size int) map[string]interface{} {
 	}
 }
 
+func (w *Default) GenerateQueryArgs(key string) []interface{} {
+	return []interface{}{}
+}
+
 func (w *Default) PrepareBatch() []string {
 	operations := make([]string, 0, BatchSize)
 	for i := 0; i < w.Config.CreatePercentage; i++ {
@@ -79,6 +83,9 @@ func (w *Default) PrepareBatch() []string {
 	}
 	for i := 0; i < w.Config.DeletePercentage; i++ {
 		operations = append(operations, "d")
+	}
+	for i := 0; i < w.Config.QueryPercentage; i++ {
+		operations = append(operations, "q")
 	}
 	if len(operations) != BatchSize {
 		log.Fatal("Wrong workload configuration: sum of percentages is not equal 100")
@@ -121,6 +128,10 @@ func (w *Default) DoBatch(db databases.Database, state *State, seq chan string) 
 			case "d":
 				key := w.i.GenerateKeyForRemoval()
 				err = db.Delete(key)
+			case "q":
+				key := w.i.GenerateExistingKey(state.Records)
+				args := w.i.GenerateQueryArgs(key)
+				err = db.Query(key, args)
 			}
 			if err != nil {
 				state.Errors[op]++

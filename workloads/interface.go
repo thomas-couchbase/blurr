@@ -12,6 +12,7 @@ type Config struct {
 	ReadPercentage          int
 	UpdatePercentage        int
 	DeletePercentage        int
+	QueryPercentage         int
 	Records                 int64
 	Operations              int64
 	ValueSize               int
@@ -19,6 +20,7 @@ type Config struct {
 	TargetThroughput        int
 	HotDataPercentage       int64
 	HotSpotAccessPercentage int
+	Views                   []string
 }
 
 type Workload interface {
@@ -31,6 +33,8 @@ type Workload interface {
 	GenerateKeyForRemoval() string
 
 	GenerateValue(key string, size int) map[string]interface{}
+
+	GenerateQueryArgs(key string) []interface{}
 
 	PrepareBatch() []string
 

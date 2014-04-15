@@ -22,9 +22,10 @@ func (state *State) Init() {
 	state.Events = map[string]time.Time{}
 	state.Latency = map[string]*summstat.Stats{
 		"Create": summstat.NewStats(),
-		"Read": summstat.NewStats(),
+		"Read":   summstat.NewStats(),
 		"Update": summstat.NewStats(),
 		"Delete": summstat.NewStats(),
+		"Query":  summstat.NewStats(),
 	}
 }
 
@@ -83,12 +84,21 @@ func (state *State) MeasureLatency(database databases.Database,
 			t1 := time.Now()
 			state.Latency["Delete"].AddSample(summstat.Sample(t1.Sub(t0)))
 		}
+		if config.QueryPercentage > 0 {
+			state.Operations++
+			key := workload.GenerateExistingKey(state.Records)
+			args := workload.GenerateQueryArgs(key)
+			t0 := time.Now()
+			database.Query(key, args)
+			t1 := time.Now()
+			state.Latency["Query"].AddSample(summstat.Sample(t1.Sub(t0)))
+		}
 		time.Sleep(time.Second)
 	}
 }
 
 func (state *State) ReportSummary() {
-	for _, op := range []string{"Create", "Read", "Update", "Delete"} {
+	for _, op := range []string{"Create", "Read", "Update", "Delete", "Query"} {
 		if state.Latency[op].Count() > 0 {
 			fmt.Printf("%v latency:\n", op)
 			for _, percentile := range []float64{0.8, 0.9, 0.95, 0.99} {
@@ -105,6 +115,7 @@ func (state *State) ReportSummary() {
 		fmt.Printf("\tRead   : %v\n", state.Errors["r"])
 		fmt.Printf("\tUpdate : %v\n", state.Errors["u"])
 		fmt.Printf("\tDelete : %v\n", state.Errors["d"])
+		fmt.Printf("\tQuery  : %v\n", state.Errors["q"])
 		fmt.Printf("\tTotal  : %v\n", state.Errors["total"])
 	}
 	fmt.Printf("Time elapsed:\n\t%v\n",

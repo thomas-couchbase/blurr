@@ -49,3 +49,7 @@ func (mongo *MongoDB) Delete(key string) error {
 	err := mongo.Collection.Remove(bson.M{"_id": key})
 	return err
 }
+
+func (cb *MongoDB) Query(key string, args []interface{}) error {
+	return nil
+}

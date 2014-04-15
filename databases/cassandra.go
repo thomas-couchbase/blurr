@@ -67,3 +67,7 @@ func (cs *Cassandra) Delete(key string) error {
 	err := cs.Pool.Writer().Delete(cs.ColumnFamily, []byte(key)).Run()
 	return err
 }
+
+func (cb *Cassandra) Query(key string, args []interface{}) error {
+	return nil
+}

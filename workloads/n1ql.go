@@ -213,3 +213,12 @@ func (w *N1QL) GenerateValue(key string, size int) map[string]interface{} {
 		"body":         RandString(key, w.RandSize(size)),
 	}
 }
+
+func (w *N1QL) GenerateQueryArgs(key string) []interface{} {
+	alphabet := build_alphabet(key)
+	return []interface{}{
+		"A", // ddoc name
+		w.Config.Views[rand.Intn(len(w.Config.Views))], // view name
+		build_city(alphabet),                           // key
+	}
+}

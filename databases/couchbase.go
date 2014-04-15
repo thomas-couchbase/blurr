@@ -42,3 +42,14 @@ func (cb *Couchbase) Delete(key string) error {
 	err := cb.Bucket.Delete(key)
 	return err
 }
+
+func (cb *Couchbase) Query(key string, args []interface{}) error {
+	view := args[1].(string)
+	var params map[string]interface{}
+
+	if view == "id_by_city" {
+		params = map[string]interface{}{"key": args[1], "limit": 10}
+	}
+	_, err := cb.Bucket.View("A", view, params)
+	return err
+}

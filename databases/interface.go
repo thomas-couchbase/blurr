@@ -21,4 +21,6 @@ type Database interface {
 	Update(key string, value map[string]interface{}) error
 
 	Delete(key string) error
+
+	Query(key string, value []interface{}) error
 }
