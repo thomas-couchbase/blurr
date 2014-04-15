@@ -32,20 +32,52 @@ func TestN1QLDoc(t *testing.T) {
 	new_doc := workload.GenerateValue("000000000020", OVERHEAD)
 
 	expected_doc := map[string]interface{}{
+		"name": map[string]interface{}{
+			"f": map[string]interface{}{
+				"f": map[string]interface{}{
+					"f": "ecdb3e e921c9",
+				},
+			},
+		},
+		"email": map[string]interface{}{
+			"f": map[string]interface{}{
+				"f": "3d13c6@a2d1f3.com",
+			},
+		},
+		"street": map[string]interface{}{
+			"f": map[string]interface{}{
+				"f": "400f1d0a",
+			},
+		},
+		"city": map[string]interface{}{
+			"f": map[string]interface{}{
+				"f": "90ac48",
+			},
+		},
+		"county": map[string]interface{}{
+			"f": map[string]interface{}{
+				"f": "40efd6",
+			},
+		},
+		"realm": map[string]interface{}{
+			"f": "15e3f5",
+		},
+		"country": map[string]interface{}{
+			"f": "1811db",
+		},
+		"coins": map[string]interface{}{
+			"f": 213.54,
+		},
+		"state": map[string]interface{}{
+			"f": "WY",
+		},
+		"full_state": map[string]interface{}{
+			"f": "Montana",
+		},
 		"category":     int16(1),
-		"city":         "90ac48",
-		"coins":        213.54,
-		"country":      "1811db",
-		"county":       "40efd6",
-		"email":        "3d13c6@a2d1f3.com",
-		"full_state":   "Montana",
-		"name":         "ecdb3e e921c9",
-		"realm":        "15e3f5",
-		"state":        "WY",
-		"street":       "400f1d0a",
-		"year":         int16(1989),
 		"achievements": []int16{0, 135, 92},
 		"gmtime":       []int16{1972, 3, 3, 0, 0, 0, 4, 63, 0},
+		"year":         int16(1989),
 		"body":         "",
 	}
 

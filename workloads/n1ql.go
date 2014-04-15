@@ -152,7 +152,7 @@ func (w *N1QL) RandSize(size int) int {
 		rand_size := int(float64(size-OVERHEAD) * normal)
 		return rand_size
 	} else {
-		return int(2048 * (1 + w.Zipf.Uint64()))
+		return size * int(1+w.Zipf.Uint64())
 	}
 }
 
@@ -164,20 +164,52 @@ func (w *N1QL) GenerateValue(key string, size int) map[string]interface{} {
 	alphabet := build_alphabet(key)
 
 	return map[string]interface{}{
-		"name":         build_name(alphabet),
-		"email":        build_email(alphabet),
-		"city":         build_city(alphabet),
-		"realm":        build_realm(alphabet),
-		"country":      build_country(alphabet),
-		"county":       build_county(alphabet),
-		"street":       build_street(alphabet),
-		"coins":        build_coins(alphabet),
-		"year":         build_year(alphabet),
+		"name": map[string]interface{}{
+			"f": map[string]interface{}{
+				"f": map[string]interface{}{
+					"f": build_name(alphabet),
+				},
+			},
+		},
+		"email": map[string]interface{}{
+			"f": map[string]interface{}{
+				"f": build_email(alphabet),
+			},
+		},
+		"street": map[string]interface{}{
+			"f": map[string]interface{}{
+				"f": build_street(alphabet),
+			},
+		},
+		"city": map[string]interface{}{
+			"f": map[string]interface{}{
+				"f": build_city(alphabet),
+			},
+		},
+		"county": map[string]interface{}{
+			"f": map[string]interface{}{
+				"f": build_county(alphabet),
+			},
+		},
+		"realm": map[string]interface{}{
+			"f": build_realm(alphabet),
+		},
+		"country": map[string]interface{}{
+			"f": build_country(alphabet),
+		},
+		"coins": map[string]interface{}{
+			"f": build_coins(alphabet),
+		},
+		"state": map[string]interface{}{
+			"f": build_state(alphabet),
+		},
+		"full_state": map[string]interface{}{
+			"f": build_full_state(alphabet),
+		},
 		"category":     build_category(alphabet),
-		"state":        build_state(alphabet),
-		"full_state":   build_full_state(alphabet),
 		"achievements": build_achievements(alphabet),
 		"gmtime":       build_gmtime(alphabet),
+		"year":         build_year(alphabet),
 		"body":         RandString(key, w.RandSize(size)),
 	}
 }
