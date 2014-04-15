@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"math/rand"
 	"sync"
 	"time"
 
@@ -30,13 +31,22 @@ func init() {
 
 	switch config.Workload.Type {
 	case "Default":
-		workload = &workloads.Default{Config: config.Workload}
+		workload = &workloads.Default{
+			Config: config.Workload,
+		}
 	case "HotSpot":
-		workload = &workloads.HotSpot{Config: config.Workload,
-			Default: workloads.Default{Config: config.Workload}}
+		workload = &workloads.HotSpot{
+			Config:  config.Workload,
+			Default: workloads.Default{Config: config.Workload},
+		}
 	case "N1QL":
-		workload = &workloads.N1QL{Config: config.Workload,
-			Default: workloads.Default{Config: config.Workload}}
+		r := rand.New(rand.NewSource(0))
+		zipf := rand.NewZipf(r, 1.4, 9.0, 1000)
+		workload = &workloads.N1QL{
+			Config:  config.Workload,
+			Zipf:    *zipf,
+			Default: workloads.Default{Config: config.Workload},
+		}
 	default:
 		log.Fatal("Unsupported workload")
 	}

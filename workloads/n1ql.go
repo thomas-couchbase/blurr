@@ -2,6 +2,7 @@ package workloads
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"strconv"
@@ -12,6 +13,7 @@ import (
 type N1QL struct {
 	Config       Config
 	DeletedItems int64
+	Zipf         rand.Zipf
 	Default
 }
 
@@ -139,7 +141,26 @@ func build_achievements(alphabet string) (achievements []int16) {
 	return
 }
 
+var OVERHEAD = int(450)
+
+func (w *N1QL) RandSize(size int) int {
+	if size == OVERHEAD {
+		return 0
+	}
+	if rand.Float32() < float32(0.995) { // Outliers
+		normal := rand.NormFloat64()*0.17 + 1.0
+		rand_size := int(float64(size-OVERHEAD) * normal)
+		return rand_size
+	} else {
+		return int(2048 * (1 + w.Zipf.Uint64()))
+	}
+}
+
 func (w *N1QL) GenerateValue(key string, size int) map[string]interface{} {
+	if size < OVERHEAD {
+		log.Fatalf("Wrong workload configuration: minimal value size is %v", OVERHEAD)
+	}
+
 	alphabet := build_alphabet(key)
 
 	return map[string]interface{}{
@@ -157,5 +178,6 @@ func (w *N1QL) GenerateValue(key string, size int) map[string]interface{} {
 		"full_state":   build_full_state(alphabet),
 		"achievements": build_achievements(alphabet),
 		"gmtime":       build_gmtime(alphabet),
+		"body":         RandString(key, w.RandSize(size)),
 	}
 }

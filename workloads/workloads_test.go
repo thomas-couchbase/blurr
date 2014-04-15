@@ -1,6 +1,7 @@
 package workloads
 
 import (
+	"math/rand"
 	"reflect"
 	"testing"
 )
@@ -28,7 +29,7 @@ func TestExistingKey(t *testing.T) {
 
 func TestN1QLDoc(t *testing.T) {
 	workload := N1QL{Config: config}
-	new_doc := workload.GenerateValue("000000000020", 0)
+	new_doc := workload.GenerateValue("000000000020", OVERHEAD)
 
 	expected_doc := map[string]interface{}{
 		"category":     int16(1),
@@ -45,6 +46,7 @@ func TestN1QLDoc(t *testing.T) {
 		"year":         int16(1989),
 		"achievements": []int16{0, 135, 92},
 		"gmtime":       []int16{1972, 3, 3, 0, 0, 0, 4, 63, 0},
+		"body":         "",
 	}
 
 	for k, v := range expected_doc {
@@ -106,5 +108,14 @@ func BenchmarkRandString_2048(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		key := defaultWorkload.GenerateNewKey(int64(i + 1))
 		RandString(key, size)
+	}
+}
+
+func BenchmarkZipfSize(b *testing.B) {
+	src := rand.NewSource(0)
+	r := rand.New(src)
+	z := rand.NewZipf(r, 1.1, 9.0, 1000)
+	for i := 0; i < b.N; i++ {
+		z.Uint64()
 	}
 }
