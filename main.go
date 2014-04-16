@@ -25,6 +25,8 @@ func init() {
 		database = &databases.Couchbase{}
 	case "Cassandra":
 		database = &databases.Cassandra{}
+	case "Tuq":
+		database = &databases.Tuq{}
 	default:
 		log.Fatal("Unsupported driver")
 	}

@@ -216,9 +216,15 @@ func (w *N1QL) GenerateValue(key string, size int) map[string]interface{} {
 
 func (w *N1QL) GenerateQueryArgs(key string) []interface{} {
 	alphabet := build_alphabet(key)
-	return []interface{}{
-		"A", // ddoc name
-		w.Config.Views[rand.Intn(len(w.Config.Views))], // view name
-		build_city(alphabet),                           // key
+	view := w.Config.Views[rand.Intn(len(w.Config.Views))]
+
+	if view == "id_by_city" {
+		return []interface{}{
+			view,                 // view name
+			build_city(alphabet), // key
+		}
+	} else {
+		log.Fatalf("Uknown view: %s", view)
+		return nil
 	}
 }
