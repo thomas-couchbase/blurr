@@ -90,7 +90,7 @@ func build_category(alphabet string) int16 {
 }
 
 func build_year(alphabet string) int16 {
-	var year, _ = strconv.ParseInt(string(alphabet[62]), 32, 0)
+	var year, _ = strconv.ParseInt(string(alphabet[62]), 16, 0)
 	return int16(1985 + year)
 }
 
