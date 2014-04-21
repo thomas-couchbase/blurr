@@ -274,7 +274,7 @@ func (w *N1QL) GenerateQueryArgs(key string) []interface{} {
 			view,
 			build_city(alphabet),
 		}
-	case "street_and_name_and_email_and_achievement_and_dobule_by_county":
+	case "street_and_name_and_email_and_achievement_and_coins_by_county":
 		return []interface{}{
 			view,
 			build_county(alphabet),
