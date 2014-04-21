@@ -218,13 +218,103 @@ func (w *N1QL) GenerateQueryArgs(key string) []interface{} {
 	alphabet := build_alphabet(key)
 	view := w.Config.Views[rand.Intn(len(w.Config.Views))]
 
-	if view == "id_by_city" {
+	switch view {
+	case "name_and_street_by_city":
 		return []interface{}{
-			view,                 // view name
-			build_city(alphabet), // key
+			view,
+			build_city(alphabet),
 		}
-	} else {
-		log.Fatalf("Uknown view: %s", view)
-		return nil
+	case "name_and_email_by_county":
+		return []interface{}{
+			view,
+			build_county(alphabet),
+		}
+	case "achievements_by_realm":
+		return []interface{}{
+			view,
+			build_realm(alphabet),
+		}
+	case "name_by_coins":
+		return []interface{}{
+			view,
+			build_coins(alphabet),
+		}
+	case "email_by_achievement_and_category":
+		return []interface{}{
+			view,
+			build_achievements(alphabet),
+			build_category(alphabet),
+		}
+	case "street_by_year_and_coins":
+		return []interface{}{
+			view,
+			build_year(alphabet),
+			build_coins(alphabet),
+		}
+	case "coins_stats_by_state_and_year":
+		return []interface{}{
+			view,
+			build_state(alphabet),
+			build_year(alphabet),
+		}
+	case "coins_stats_by_gmtime_and_year":
+		return []interface{}{
+			view,
+			build_gmtime(alphabet),
+			build_year(alphabet),
+		}
+	case "coins_stats_by_full_state_and_year":
+		return []interface{}{
+			view,
+			build_full_state(alphabet),
+			build_year(alphabet),
+		}
+	case "name_and_email_and_street_and_achievements_and_coins_by_city":
+		return []interface{}{
+			view,
+			build_city(alphabet),
+		}
+	case "street_and_name_and_email_and_achievement_and_dobule_by_county":
+		return []interface{}{
+			view,
+			build_county(alphabet),
+		}
+	case "category_name_and_email_and_street_and_gmtime_and_year_by_country":
+		return []interface{}{
+			view,
+			build_country(alphabet),
+		}
+	case "calc_by_city":
+		return []interface{}{
+			view,
+			build_city(alphabet),
+		}
+	case "calc_by_county":
+		return []interface{}{
+			view,
+			build_county(alphabet),
+		}
+	case "calc_by_realm":
+		return []interface{}{
+			view,
+			build_realm(alphabet),
+		}
+	case "body_by_city":
+		return []interface{}{
+			view,
+			build_city(alphabet),
+		}
+	case "body_by_realm":
+		return []interface{}{
+			view,
+			build_realm(alphabet),
+		}
+	case "body_by_country":
+		return []interface{}{
+			view,
+			build_country(alphabet),
+		}
 	}
+	log.Fatalf("Uknown view: %s", view)
+	return nil
 }
