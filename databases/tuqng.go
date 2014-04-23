@@ -22,11 +22,6 @@ func (c RestClient) Do(q string) error {
 		return err
 	}
 
-	resp, err = c.client.Do(req)
-	if err != nil {
-		return err
-	}
-
 	defer resp.Body.Close()
 	_, err = ioutil.ReadAll(resp.Body)
 
