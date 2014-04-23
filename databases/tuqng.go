@@ -74,7 +74,7 @@ func (t *Tuq) Query(key string, args []interface{}) error {
 		q = fmt.Sprintf(query, t.bucket, args[1])
 	case "name_and_email_by_county":
 		query := `
-			SELECT name, email
+			SELECT name.f.f.f AS _name, email.f.f AS _email
 				FROM %s
 				WHERE county.f.f = "%s"
 				LIMIT 20`
@@ -88,42 +88,42 @@ func (t *Tuq) Query(key string, args []interface{}) error {
 		q = fmt.Sprintf(query, t.bucket, args[1])
 	case "name_by_coins":
 		query := `
-			SELECT name
+			SELECT name.f.f.f AS _name
 				FROM %s
 				WHERE coins.f > %f AND coins.f < %f
 				LIMIT 20`
 		q = fmt.Sprintf(query, t.bucket, args[1].(float64)*0.5, args[1])
 	case "email_by_achievement_and_category":
 		query := `
-			SELECT email
+			SELECT email.f.f AS _email
 				FROM %s
-				WHERE category = \"%s\" AND achievement[0] > 0 AND achievement < %d
+				WHERE category = %d AND achievements[0] > 0 AND achievements[0] < %d
 				LIMIT 20`
-		q = fmt.Sprintf(query, t.bucket, args[2], args[1])
+		q = fmt.Sprintf(query, t.bucket, args[2], args[1].([]int16)[0])
 	case "street_by_year_and_coins":
 		query := `
 			SELECT street
 				FROM %s
 				WHERE year = %d AND coins.f > %f AND coins.f < 655.35
 				LIMIT 20`
-		q = fmt.Sprintf(query, t.bucket, args[1])
+		q = fmt.Sprintf(query, t.bucket, args[1], args[2])
 	case "name_and_email_and_street_and_achievements_and_coins_by_city":
 		query := `
-			SELECT name, email, street, achievements, coins
+			SELECT name.f.f.f AS _name, email.f.f AS _email, street.f.f AS _street, achievements, coins.f AS _coins
 				FROM %s
 				WHERE city.f.f = "%s"
 				LIMIT 20`
 		q = fmt.Sprintf(query, t.bucket, args[1])
 	case "street_and_name_and_email_and_achievement_and_coins_by_county":
 		query := `
-			SELECT street, name, email, achievement, 2*coins
+			SELECT street.f.f AS _street, name.f.f.f AS _name, email.f.f AS _email, achievements[0] AS achievement, 2*coins.f AS _coins
 				FROM %s
 				WHERE county.f.f = "%s"
 				LIMIT 20`
 		q = fmt.Sprintf(query, t.bucket, args[1])
 	case "category_name_and_email_and_street_and_gmtime_and_year_by_country":
 		query := `
-			SELECT category, name, email, street, gmtime, year
+			SELECT category, name.f.f.f AS _name, email.f.f AS _email, street.f.f AS _street, gmtime, year
 				FROM %s
 				WHERE country.f = "%s"
 				LIMIT 20`
@@ -151,7 +151,7 @@ func (t *Tuq) Query(key string, args []interface{}) error {
 		q = fmt.Sprintf(query, t.bucket, args[1])
 	case "coins_stats_by_state_and_year":
 		query := `
-			SELECT count(coins), sum(coins), avg(coins), min(coins), max(coins)
+			SELECT COUNT(coins.f), SUM(coins.f), AVG(coins.f), MIN(coins.f), MAX(coins.f)
 				FROM %s
 				WHERE state.f = "%s" and year = %d
 				GROUP BY state.f, year
@@ -159,15 +159,18 @@ func (t *Tuq) Query(key string, args []interface{}) error {
 		q = fmt.Sprintf(query, t.bucket, args[1], args[2])
 	case "coins_stats_by_gmtime_and_year":
 		query := `
-			SELECT count(coins), sum(coins), avg(coins), min(coins), max(coins)
+			SELECT COUNT(coins.f), SUM(coins.f), AVG(coins.f), MIN(coins.f), MAX(coins.f)
 				FROM %s
-				WHERE gmtime = "%v" and year = %d
+				WHERE gmtime = [%d, %d, %d, %d, %d, %d, %d, %d, %d] and year = %d
 				GROUP BY gmtime, year
 				LIMIT 20`
-		q = fmt.Sprintf(query, t.bucket, args[1], args[2])
+		gmtime := args[1].([]int16)
+		q = fmt.Sprintf(query, t.bucket,
+			gmtime[0], gmtime[1], gmtime[2], gmtime[3], gmtime[4], gmtime[5], gmtime[6], gmtime[7], gmtime[8],
+			args[2])
 	case "coins_stats_by_full_state_and_year":
 		query := `
-			SELECT count(coins), sum(coins), avg(coins), min(coins), max(coins)
+			SELECT COUNT(coins.f), SUM(coins.f), AVG(coins.f), MIN(coins.f), MAX(coins.f)
 				FROM %s
 				WHERE full_state.f = "%s" and year = %d
 				GROUP BY full_state.f, year
