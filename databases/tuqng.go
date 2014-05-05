@@ -35,6 +35,7 @@ func (c RestClient) Do(q string) error {
 
 type Tuq struct {
 	client *RestClient
+	cb     Couchbase
 	bucket string
 }
 
@@ -45,24 +46,27 @@ func (t *Tuq) Init(config Config) {
 	tr := &http.Transport{MaxIdleConnsPerHost: MaxIdleConnsPerHost}
 	t.client = &RestClient{&http.Client{Transport: tr}, baseURI}
 	t.bucket = config.Table
+
+	t.cb = Couchbase{}
+	t.cb.Init(config)
 }
 
 func (t *Tuq) Shutdown() {}
 
 func (t *Tuq) Create(key string, value map[string]interface{}) error {
-	return nil
+	return t.cb.Create(key, value)
 }
 
 func (t *Tuq) Read(key string) error {
-	return nil
+	return t.cb.Read(key)
 }
 
 func (t *Tuq) Update(key string, value map[string]interface{}) error {
-	return nil
+	return t.cb.Update(key, value)
 }
 
 func (t *Tuq) Delete(key string) error {
-	return nil
+	return t.cb.Delete(key)
 }
 
 func (t *Tuq) Query(key string, args []interface{}) error {

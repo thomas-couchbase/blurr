@@ -2,6 +2,7 @@ package databases
 
 import (
 	"log"
+	"strings"
 
 	"github.com/couchbaselabs/go-couchbase"
 )
@@ -11,7 +12,8 @@ type Couchbase struct {
 }
 
 func (cb *Couchbase) Init(config Config) {
-	bucket, err := couchbase.GetBucket(config.Addresses[0], config.Name, config.Table)
+	address := strings.Replace(config.Addresses[0], "8093", "8091", -1)
+	bucket, err := couchbase.GetBucket(address, config.Name, config.Table)
 	if err != nil {
 		log.Fatal(err)
 	}
