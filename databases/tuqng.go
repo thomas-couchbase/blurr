@@ -2,6 +2,7 @@ package databases
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -20,6 +21,10 @@ func (c RestClient) Do(q string) error {
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode != 200 {
+		return errors.New("Bad status code")
 	}
 
 	defer resp.Body.Close()
