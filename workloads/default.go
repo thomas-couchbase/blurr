@@ -123,7 +123,7 @@ func (w *Default) DoBatch(db databases.Database, state *State, seq chan string) 
 				err = db.Read(key)
 			case "u":
 				key := w.i.GenerateExistingKey(state.Records)
-				value := w.GenerateValue(key, w.Config.ValueSize)
+				value := w.i.GenerateValue(key, w.Config.ValueSize)
 				err = db.Update(key, value)
 			case "d":
 				key := w.i.GenerateKeyForRemoval()
