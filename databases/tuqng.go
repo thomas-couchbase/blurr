@@ -76,7 +76,7 @@ func (t *Tuq) Query(key string, args []interface{}) error {
 	switch view {
 	case "name_and_street_by_city":
 		query := `
-			SELECT category
+			SELECT name.f.f.f AS _name, street.f.f AS _street
 				FROM %s
 				WHERE city.f.f = "%s"
 				LIMIT 20`
@@ -111,11 +111,11 @@ func (t *Tuq) Query(key string, args []interface{}) error {
 		q = fmt.Sprintf(query, t.bucket, args[2], args[1].([]int16)[0])
 	case "street_by_year_and_coins":
 		query := `
-			SELECT street
+			SELECT street.f.f AS _street
 				FROM %s
 				WHERE year = %d AND coins.f > %f AND coins.f < 655.35
 				LIMIT 20`
-		q = fmt.Sprintf(query, t.bucket, args[1], args[2])
+		q = fmt.Sprintf(query, t.bucket, args[1], args[2].(float64))
 	case "name_and_email_and_street_and_achievements_and_coins_by_city":
 		query := `
 			SELECT name.f.f.f AS _name, email.f.f AS _email, street.f.f AS _street, achievements, coins.f AS _coins
