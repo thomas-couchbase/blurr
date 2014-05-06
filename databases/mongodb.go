@@ -93,7 +93,7 @@ func (mongo *MongoDB) Query(key string, args []interface{}) error {
 			"category": args[2].(int16),
 			"achievements.0": bson.M{
 				"$gt": 0,
-				"$lt": args[1].([]int16)[0],
+				"$lt": args[1].([]int16)[0] + 2,
 			},
 		}
 		s = bson.M{
