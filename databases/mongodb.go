@@ -90,7 +90,7 @@ func (mongo *MongoDB) Query(key string, args []interface{}) error {
 		}
 	case "email_by_achievement_and_category":
 		q = bson.M{
-			"category": args[2],
+			"category": args[2].(int16),
 			"achievements.0": bson.M{
 				"$gt": 0,
 				"$lt": args[1].([]int16)[0],

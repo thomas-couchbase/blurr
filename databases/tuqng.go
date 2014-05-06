@@ -108,7 +108,7 @@ func (t *Tuq) Query(key string, args []interface{}) error {
 				FROM %s
 				WHERE category = %d AND achievements[0] > 0 AND achievements[0] < %d
 				LIMIT 20`
-		q = fmt.Sprintf(query, t.bucket, args[2], args[1].([]int16)[0])
+		q = fmt.Sprintf(query, t.bucket, args[2].(int16), args[1].([]int16)[0])
 	case "street_by_year_and_coins":
 		query := `
 			SELECT street.f.f AS _street
