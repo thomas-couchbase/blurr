@@ -162,7 +162,7 @@ func (t *Tuq) Query(key string, args []interface{}) error {
 		query := `
 			SELECT COUNT(coins.f), SUM(coins.f), AVG(coins.f), MIN(coins.f), MAX(coins.f)
 				FROM %s
-				WHERE state.f = "%s" and year = %d
+				WHERE state.f = "%s" AND year = %d
 				GROUP BY state.f, year
 				LIMIT 20`
 		q = fmt.Sprintf(query, t.bucket, args[1], args[2])
@@ -170,7 +170,7 @@ func (t *Tuq) Query(key string, args []interface{}) error {
 		query := `
 			SELECT COUNT(coins.f), SUM(coins.f), AVG(coins.f), MIN(coins.f), MAX(coins.f)
 				FROM %s
-				WHERE gmtime = [%d, %d, %d, %d, %d, %d, %d, %d, %d] and year = %d
+				WHERE gmtime = [%d, %d, %d, %d, %d, %d, %d, %d, %d] AND year = %d
 				GROUP BY gmtime, year
 				LIMIT 20`
 		gmtime := args[1].([]int16)
@@ -181,7 +181,7 @@ func (t *Tuq) Query(key string, args []interface{}) error {
 		query := `
 			SELECT COUNT(coins.f), SUM(coins.f), AVG(coins.f), MIN(coins.f), MAX(coins.f)
 				FROM %s
-				WHERE full_state.f = "%s" and year = %d
+				WHERE full_state.f = "%s" AND year = %d
 				GROUP BY full_state.f, year
 				LIMIT 20`
 		q = fmt.Sprintf(query, t.bucket, args[1], args[2])
