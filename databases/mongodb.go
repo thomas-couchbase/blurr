@@ -31,7 +31,11 @@ func (mongo *MongoDB) Shutdown() {
 func (mongo *MongoDB) Create(key string, value map[string]interface{}) error {
 	value["_id"] = key
 	err := mongo.Collection.Insert(bson.M(value))
-	return err
+	if !mgo.IsDup(err) {
+		return err
+	} else {
+		return nil
+	}
 }
 
 func (mongo *MongoDB) Read(key string) error {
