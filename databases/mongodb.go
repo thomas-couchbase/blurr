@@ -58,6 +58,7 @@ func (mongo *MongoDB) Query(key string, args []interface{}) error {
 	view := args[0].(string)
 
 	var q, s bson.M
+	var pipe *mgo.Pipe
 	switch view {
 	case "name_and_street_by_city":
 		q = bson.M{
@@ -169,9 +170,87 @@ func (mongo *MongoDB) Query(key string, args []interface{}) error {
 		s = bson.M{
 			"body": 1,
 		}
+	case "coins_stats_by_state_and_year":
+		pipe = mongo.Collection.Pipe(
+			[]bson.M{
+				{
+					"$match": bson.M{
+						"state.f": args[1],
+						"year":    args[2],
+					},
+				},
+				{
+					"$group": bson.M{
+						"_id": bson.M{
+							"state": "$state.f",
+							"year":  "$year",
+						},
+						"count": bson.M{"$sum": 1},
+						"sum":   bson.M{"$sum": "$coins.f"},
+						"avg":   bson.M{"$avg": "$coins.f"},
+						"min":   bson.M{"$min": "$coins.f"},
+						"max":   bson.M{"$max": "$coins.f"},
+					},
+				},
+			},
+		)
+	case "coins_stats_by_gmtime_and_year":
+		pipe = mongo.Collection.Pipe(
+			[]bson.M{
+				{
+					"$match": bson.M{
+						"gmtime": args[1],
+						"year":   args[2],
+					},
+				},
+				{
+					"$group": bson.M{
+						"_id": bson.M{
+							"gmtime": "$gmtime",
+							"year":   "$year",
+						},
+						"count": bson.M{"$sum": 1},
+						"sum":   bson.M{"$sum": "$coins.f"},
+						"avg":   bson.M{"$avg": "$coins.f"},
+						"min":   bson.M{"$min": "$coins.f"},
+						"max":   bson.M{"$max": "$coins.f"},
+					},
+				},
+			},
+		)
+	case "coins_stats_by_full_state_and_year":
+		pipe = mongo.Collection.Pipe(
+			[]bson.M{
+				{
+					"$match": bson.M{
+						"full_state.f": args[1],
+						"year":         args[2],
+					},
+				},
+				{
+					"$group": bson.M{
+						"_id": bson.M{
+							"year":       "$year",
+							"full_state": "$full_state.f",
+						},
+						"count": bson.M{"$sum": 1},
+						"sum":   bson.M{"$sum": "$coins.f"},
+						"avg":   bson.M{"$avg": "$coins.f"},
+						"min":   bson.M{"$min": "$coins.f"},
+						"max":   bson.M{"$max": "$coins.f"},
+					},
+				},
+			},
+		)
 	}
 
+	var err error
 	result := []map[string]interface{}{}
-	err := mongo.Collection.Find(q).Select(s).Limit(20).All(&result)
+	if len(q) == 0 {
+		err = pipe.All(&result)
+	} else {
+		err = mongo.Collection.Find(q).Select(s).Limit(20).All(&result)
+	}
+
 	return err
 }
