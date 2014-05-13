@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"math/rand"
+	"runtime"
 	"sync"
 	"time"
 
@@ -62,6 +63,8 @@ func init() {
 }
 
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
 	wg := sync.WaitGroup{}
 	wgStats := sync.WaitGroup{}
 
