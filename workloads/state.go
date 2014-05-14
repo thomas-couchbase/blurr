@@ -2,10 +2,10 @@ package workloads
 
 import (
 	"fmt"
+	"math"
+	"sort"
 	"sync"
 	"time"
-
-	"github.com/patrick-higgins/summstat"
 
 	"github.com/pavel-paulau/blurr/databases"
 )
@@ -14,18 +14,18 @@ type State struct {
 	Operations, Records int64
 	Errors              map[string]int
 	Events              map[string]time.Time
-	Latency             map[string]*summstat.Stats
+	Latency             map[string][]float64
 }
 
 func (state *State) Init() {
 	state.Errors = map[string]int{}
 	state.Events = map[string]time.Time{}
-	state.Latency = map[string]*summstat.Stats{
-		"Create": summstat.NewStats(),
-		"Read":   summstat.NewStats(),
-		"Update": summstat.NewStats(),
-		"Delete": summstat.NewStats(),
-		"Query":  summstat.NewStats(),
+	state.Latency = map[string][]float64{
+		"Create": []float64{},
+		"Read":   []float64{},
+		"Update": []float64{},
+		"Delete": []float64{},
+		"Query":  []float64{},
 	}
 }
 
@@ -57,7 +57,8 @@ func (state *State) MeasureLatency(database databases.Database,
 			t0 := time.Now()
 			database.Create(key, value)
 			t1 := time.Now()
-			state.Latency["Create"].AddSample(summstat.Sample(t1.Sub(t0)))
+			latency := float64(t1.Sub(t0)/time.Microsecond) / 1000
+			state.Latency["Create"] = append(state.Latency["Create"], latency)
 		}
 		if config.ReadPercentage > 0 {
 			state.Operations++
@@ -65,7 +66,8 @@ func (state *State) MeasureLatency(database databases.Database,
 			t0 := time.Now()
 			database.Read(key)
 			t1 := time.Now()
-			state.Latency["Read"].AddSample(summstat.Sample(t1.Sub(t0)))
+			latency := float64(t1.Sub(t0)/time.Microsecond) / 1000
+			state.Latency["Read"] = append(state.Latency["Read"], latency)
 		}
 		if config.UpdatePercentage > 0 {
 			state.Operations++
@@ -74,7 +76,8 @@ func (state *State) MeasureLatency(database databases.Database,
 			t0 := time.Now()
 			database.Update(key, value)
 			t1 := time.Now()
-			state.Latency["Update"].AddSample(summstat.Sample(t1.Sub(t0)))
+			latency := float64(t1.Sub(t0)/time.Microsecond) / 1000
+			state.Latency["Update"] = append(state.Latency["Update"], latency)
 		}
 		if config.DeletePercentage > 0 {
 			state.Operations++
@@ -82,7 +85,8 @@ func (state *State) MeasureLatency(database databases.Database,
 			t0 := time.Now()
 			database.Delete(key)
 			t1 := time.Now()
-			state.Latency["Delete"].AddSample(summstat.Sample(t1.Sub(t0)))
+			latency := float64(t1.Sub(t0)/time.Microsecond) / 1000
+			state.Latency["Delete"] = append(state.Latency["Delete"], latency)
 		}
 		if config.QueryPercentage > 0 {
 			state.Operations++
@@ -91,24 +95,47 @@ func (state *State) MeasureLatency(database databases.Database,
 			t0 := time.Now()
 			database.Query(key, args)
 			t1 := time.Now()
-			state.Latency["Query"].AddSample(summstat.Sample(t1.Sub(t0)))
+			latency := float64(t1.Sub(t0)/time.Microsecond) / 1000
+			state.Latency["Query"] = append(state.Latency["Query"], latency)
 		}
 		time.Sleep(time.Second)
 	}
 }
 
+func calcPercentile(data []float64, p float64) float64 {
+	sort.Float64s(data)
+
+	k := float64(len(data)-1) * p
+	f := math.Floor(k)
+	c := math.Ceil(k)
+	if f == c {
+		return data[int(k)]
+	} else {
+		return data[int(f)]*(c-k) + data[int(c)]*(k-f)
+	}
+}
+
+func calcMean(data []float64) float64 {
+	sum := float64(0)
+	for _, v := range data {
+		sum += v
+	}
+	return sum / float64(len(data))
+}
+
 func (state *State) ReportSummary() {
 	for _, op := range []string{"Create", "Read", "Update", "Delete", "Query"} {
-		if state.Latency[op].Count() > 0 {
+		if len(state.Latency[op]) > 0 {
 			fmt.Printf("%v latency:\n", op)
 			for _, percentile := range []float64{0.8, 0.9, 0.95, 0.99} {
-				value := time.Duration(state.Latency[op].Percentile(percentile))
-				fmt.Printf("\t%vth percentile: %v\n", percentile*100, value)
+				value := calcPercentile(state.Latency[op], percentile)
+				fmt.Printf("\t%vth percentile: %.2f ms\n", percentile*100, value)
 			}
-			mean := time.Duration(state.Latency[op].Mean())
-			fmt.Printf("\tMean: %v\n", mean)
+			value := calcMean(state.Latency[op])
+			fmt.Printf("\tMean: %.2f ms\n", value)
 		}
 	}
+
 	if len(state.Errors) > 0 {
 		fmt.Println("Errors:")
 		fmt.Printf("\tCreate : %v\n", state.Errors["c"])
