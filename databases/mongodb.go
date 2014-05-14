@@ -2,26 +2,32 @@ package databases
 
 import (
 	"log"
-	"strings"
+	"time"
 
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 )
 
 type MongoDB struct {
-	Collection *mgo.Collection
-	Session    *mgo.Session
+	Session        *mgo.Session
+	DBName         string
+	CollectionName string
 }
 
 func (mongo *MongoDB) Init(config Config) {
-	pool := strings.Join(config.Addresses, ",")
+	dialInfo := &mgo.DialInfo{
+		Addrs:   config.Addresses,
+		Timeout: 10 * time.Minute,
+	}
+
 	var err error
-	mongo.Session, err = mgo.Dial(pool)
+	mongo.Session, err = mgo.DialWithInfo(dialInfo)
 	if err != nil {
 		log.Fatal(err)
 	}
 	mongo.Session.SetMode(mgo.Monotonic, true)
-	mongo.Collection = mongo.Session.DB(config.Name).C(config.Table)
+	mongo.DBName = config.Name
+	mongo.CollectionName = config.Table
 }
 
 func (mongo *MongoDB) Shutdown() {
@@ -29,8 +35,12 @@ func (mongo *MongoDB) Shutdown() {
 }
 
 func (mongo *MongoDB) Create(key string, value map[string]interface{}) error {
+	session := mongo.Session.New()
+	defer session.Close()
+	collection := session.DB(mongo.DBName).C(mongo.CollectionName)
+
 	value["_id"] = key
-	err := mongo.Collection.Insert(bson.M(value))
+	err := collection.Insert(bson.M(value))
 	if !mgo.IsDup(err) {
 		return err
 	} else {
@@ -39,23 +49,39 @@ func (mongo *MongoDB) Create(key string, value map[string]interface{}) error {
 }
 
 func (mongo *MongoDB) Read(key string) error {
+	session := mongo.Session.New()
+	defer session.Close()
+	collection := session.DB(mongo.DBName).C(mongo.CollectionName)
+
 	result := map[string]interface{}{}
-	err := mongo.Collection.FindId(key).One(&result)
+	err := collection.FindId(key).One(&result)
 	return err
 }
 
 func (mongo *MongoDB) Update(key string, value map[string]interface{}) error {
-	err := mongo.Collection.Update(bson.M{"_id": key}, bson.M(value))
+	session := mongo.Session.New()
+	defer session.Close()
+	collection := session.DB(mongo.DBName).C(mongo.CollectionName)
+
+	err := collection.Update(bson.M{"_id": key}, bson.M(value))
 	return err
 }
 
 func (mongo *MongoDB) Delete(key string) error {
-	err := mongo.Collection.Remove(bson.M{"_id": key})
+	session := mongo.Session.New()
+	defer session.Close()
+	collection := session.DB(mongo.DBName).C(mongo.CollectionName)
+
+	err := collection.Remove(bson.M{"_id": key})
 	return err
 }
 
 func (mongo *MongoDB) Query(key string, args []interface{}) error {
 	view := args[0].(string)
+
+	session := mongo.Session.New()
+	defer session.Close()
+	collection := session.DB(mongo.DBName).C(mongo.CollectionName)
 
 	var q, s bson.M
 	var pipe *mgo.Pipe
@@ -171,7 +197,7 @@ func (mongo *MongoDB) Query(key string, args []interface{}) error {
 			"body": 1,
 		}
 	case "coins_stats_by_state_and_year":
-		pipe = mongo.Collection.Pipe(
+		pipe = collection.Pipe(
 			[]bson.M{
 				{
 					"$match": bson.M{
@@ -195,7 +221,7 @@ func (mongo *MongoDB) Query(key string, args []interface{}) error {
 			},
 		)
 	case "coins_stats_by_gmtime_and_year":
-		pipe = mongo.Collection.Pipe(
+		pipe = collection.Pipe(
 			[]bson.M{
 				{
 					"$match": bson.M{
@@ -219,7 +245,7 @@ func (mongo *MongoDB) Query(key string, args []interface{}) error {
 			},
 		)
 	case "coins_stats_by_full_state_and_year":
-		pipe = mongo.Collection.Pipe(
+		pipe = collection.Pipe(
 			[]bson.M{
 				{
 					"$match": bson.M{
@@ -249,8 +275,9 @@ func (mongo *MongoDB) Query(key string, args []interface{}) error {
 	if len(q) == 0 {
 		err = pipe.All(&result)
 	} else {
-		err = mongo.Collection.Find(q).Select(s).Limit(20).All(&result)
+		err = collection.Find(q).Select(s).Limit(20).All(&result)
 	}
+	session.Close()
 
 	return err
 }
