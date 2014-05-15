@@ -158,6 +158,24 @@ func (t *Tuq) Query(key string, args []interface{}) error {
 				WHERE country.f = "%s"
 				LIMIT 20`
 		q = fmt.Sprintf(query, t.bucket, args[1])
+	case "distinct_states":
+		query := `
+			SELECT DISTINCT state.f AS state
+				FROM %s
+				LIMIT 20`
+		q = fmt.Sprintf(query, t.bucket)
+	case "distinct_full_states":
+		query := `
+			SELECT DISTINCT full_state.f AS full_state
+				FROM %s
+				LIMIT 20`
+		q = fmt.Sprintf(query, t.bucket)
+	case "distinct_years":
+		query := `
+			SELECT DISTINCT year
+				FROM %s
+				LIMIT 20`
+		q = fmt.Sprintf(query, t.bucket)
 	case "coins_stats_by_state_and_year":
 		query := `
 			SELECT COUNT(coins.f), SUM(coins.f), AVG(coins.f), MIN(coins.f), MAX(coins.f)

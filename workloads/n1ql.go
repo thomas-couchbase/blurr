@@ -314,6 +314,21 @@ func (w *N1QL) GenerateQueryArgs(key string) []interface{} {
 			view,
 			build_country(alphabet),
 		}
+	case "distinct_states":
+		return []interface{}{
+			view,
+			"state.f",
+		}
+	case "distinct_full_states":
+		return []interface{}{
+			view,
+			"full_state.f",
+		}
+	case "distinct_years":
+		return []interface{}{
+			view,
+			"year",
+		}
 	}
 	log.Fatalf("Uknown view: %s", view)
 	return nil

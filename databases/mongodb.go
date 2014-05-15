@@ -84,6 +84,7 @@ func (mongo *MongoDB) Query(key string, args []interface{}) error {
 	collection := session.DB(mongo.DBName).C(mongo.CollectionName)
 
 	var q, s bson.M
+	var d string
 	var pipe *mgo.Pipe
 	switch view {
 	case "name_and_street_by_city":
@@ -196,6 +197,12 @@ func (mongo *MongoDB) Query(key string, args []interface{}) error {
 		s = bson.M{
 			"body": 1,
 		}
+	case "distinct_states":
+		d = args[1].(string)
+	case "distinct_full_states":
+		d = args[1].(string)
+	case "distinct_years":
+		d = args[1].(string)
 	case "coins_stats_by_state_and_year":
 		pipe = collection.Pipe(
 			[]bson.M{
@@ -272,10 +279,12 @@ func (mongo *MongoDB) Query(key string, args []interface{}) error {
 
 	var err error
 	result := []map[string]interface{}{}
-	if len(q) == 0 {
-		err = pipe.All(&result)
-	} else {
+	if len(q) != 0 {
 		err = collection.Find(q).Select(s).Limit(20).All(&result)
+	} else if len(d) != 0 {
+		err = collection.Find(bson.M{}).Distinct(d, &result)
+	} else {
+		err = pipe.All(&result)
 	}
 	session.Close()
 
