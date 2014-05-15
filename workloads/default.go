@@ -84,9 +84,6 @@ func (w *Default) PrepareBatch() []string {
 	for i := 0; i < w.Config.DeletePercentage; i++ {
 		operations = append(operations, "d")
 	}
-	for i := 0; i < w.Config.QueryPercentage; i++ {
-		operations = append(operations, "q")
-	}
 	if len(operations) != BatchSize {
 		log.Fatal("Wrong workload configuration: sum of percentages is not equal 100")
 	}

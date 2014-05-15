@@ -38,7 +38,9 @@ func ReadConfig() (config Config) {
 		log.Fatal("Please specify non-zero 'Records'")
 	}
 
-	config.Workload.Throughput /= config.Workload.Workers
+	if config.Workload.Workers > 0 {
+		config.Workload.Throughput /= config.Workload.Workers
+	}
 	if config.Workload.QueryWorkers > 0 {
 		config.Workload.QueryThroughput /= config.Workload.QueryWorkers
 	}

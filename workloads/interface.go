@@ -12,7 +12,6 @@ type Config struct {
 	ReadPercentage          int
 	UpdatePercentage        int
 	DeletePercentage        int
-	QueryPercentage         int
 	Records                 int64
 	Operations              int64
 	ValueSize               int
