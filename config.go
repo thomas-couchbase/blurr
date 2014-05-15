@@ -30,7 +30,15 @@ func ReadConfig() (config Config) {
 		log.Fatal(err)
 	}
 
+	if config.Workload.ReadPercentage+config.Workload.UpdatePercentage+
+		config.Workload.DeletePercentage > 0 && config.Workload.Records == 0 {
+		log.Fatal("Please specify non-zero 'Records'")
+	}
+
 	config.Workload.Throughput /= config.Workload.Workers
-	config.Workload.QueryThroughput /= config.Workload.QueryWorkers
+	if config.Workload.QueryWorkers > 0 {
+		config.Workload.QueryThroughput /= config.Workload.QueryWorkers
+	}
+
 	return
 }
