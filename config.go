@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 
@@ -16,11 +17,13 @@ type Config struct {
 }
 
 func ReadConfig() (config Config) {
-	workload_path := flag.String("workload", "samples/workload.conf",
-		"Path to workload configuration")
+	flag.Usage = func() {
+		fmt.Println("Usage: blurr workload.conf")
+	}
 	flag.Parse()
+	workload_path := flag.Arg(0)
 
-	workload, err := ioutil.ReadFile(*workload_path)
+	workload, err := ioutil.ReadFile(workload_path)
 	if err != nil {
 		log.Fatal(err)
 	}
