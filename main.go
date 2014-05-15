@@ -83,10 +83,15 @@ func main() {
 	go state.ReportThroughput(config.Workload, &wgStats)
 	go state.MeasureLatency(database, workload, config.Workload, &wgStats)
 
-	wg.Wait()
-	state.Events["Finished"] = time.Now()
-	wgStats.Wait()
+	if config.Workload.RunTime > 0 {
+		time.Sleep(time.Duration(config.Workload.RunTime) * time.Second)
+		log.Println("Shutting down workers")
+	} else {
+		wg.Wait()
+		wgStats.Wait()
+	}
 
 	database.Shutdown()
+	state.Events["Finished"] = time.Now()
 	state.ReportSummary()
 }

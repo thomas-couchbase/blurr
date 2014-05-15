@@ -49,7 +49,8 @@ blurr uses JSON format for configuration. There are two groups of parameters, ex
             "Throughput": 2000,
             "QueryThroughput": 100,
             "HotDataPercentage": 20,
-            "HotSpotAccessPercentage": 95
+            "HotSpotAccessPercentage": 95,
+            "RunTime": 3600
         }
     }
 
@@ -68,3 +69,4 @@ blurr uses JSON format for configuration. There are two groups of parameters, ex
 * Workload.QueryThroughput - enable limited throughput of queries if provided
 * Workload.HotDataPercentage - percentage of hot records in dataset (HotSpot workload)
 * Workload.HotSpotAccessPercentage - percentage of operations that hit hot subset (HotSpot workload)
+* Workload.RunTime - optional benchmark run time in seconds

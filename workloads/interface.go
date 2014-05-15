@@ -22,6 +22,7 @@ type Config struct {
 	QueryThroughput         int
 	HotDataPercentage       int64
 	HotSpotAccessPercentage int
+	RunTime                 int
 	Views                   []string
 }
 
