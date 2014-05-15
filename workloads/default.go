@@ -106,6 +106,22 @@ func (w *Default) PrepareSeq(size int64) chan string {
 	return seq
 }
 
+func (w *Default) PrepareQuerySeq(size int64) chan string {
+	operations := make([]string, 0, BatchSize)
+	for i := 0; i < BatchSize; i++ {
+		operations = append(operations, "q")
+	}
+	seq := make(chan string, BatchSize)
+	go func() {
+		for i := int64(0); i < size; i += int64(BatchSize) {
+			for j := 0; j < BatchSize; j++ {
+				seq <- "q"
+			}
+		}
+	}()
+	return seq
+}
+
 func (w *Default) DoBatch(db databases.Database, state *State, seq chan string) {
 	for i := 0; i < BatchSize; i++ {
 		op := <-seq
@@ -141,14 +157,8 @@ func (w *Default) DoBatch(db databases.Database, state *State, seq chan string) 
 	}
 }
 
-func (w *Default) RunWorkload(database databases.Database,
-	state *State, wg *sync.WaitGroup) {
-	defer wg.Done()
-
-	rand.Seed(time.Now().UnixNano())
-	seq := w.PrepareSeq(w.Config.Operations)
-
-	targetBatchTimeF := float64(BatchSize) / float64(w.Config.Throughput)
+func (w *Default) runWorkload(database databases.Database,
+	state *State, wg *sync.WaitGroup, targetBatchTimeF float64, seq chan string) {
 
 	for state.Operations < w.Config.Operations {
 		t0 := time.Now()
@@ -164,4 +174,22 @@ func (w *Default) RunWorkload(database databases.Database,
 			}
 		}
 	}
+}
+
+func (w *Default) RunCRUDWorkload(database databases.Database,
+	state *State, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	seq := w.PrepareSeq(w.Config.Operations)
+	targetBatchTimeF := float64(BatchSize) / float64(w.Config.Throughput)
+	w.runWorkload(database, state, wg, targetBatchTimeF, seq)
+}
+
+func (w *Default) RunQueryWorkload(database databases.Database,
+	state *State, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	seq := w.PrepareQuerySeq(w.Config.Operations)
+	targetBatchTimeF := float64(BatchSize) / float64(w.Config.QueryThroughput)
+	w.runWorkload(database, state, wg, targetBatchTimeF, seq)
 }

@@ -71,7 +71,12 @@ func main() {
 	state.Events["Started"] = time.Now()
 	for worker := 0; worker < config.Workload.Workers; worker++ {
 		wg.Add(1)
-		go workload.RunWorkload(database, &state, &wg)
+		go workload.RunCRUDWorkload(database, &state, &wg)
+	}
+
+	for worker := 0; worker < config.Workload.QueryWorkers; worker++ {
+		wg.Add(1)
+		go workload.RunQueryWorkload(database, &state, &wg)
 	}
 
 	wgStats.Add(2)

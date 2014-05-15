@@ -17,7 +17,9 @@ type Config struct {
 	Operations              int64
 	ValueSize               int
 	Workers                 int
+	QueryWorkers            int
 	Throughput              int
+	QueryThroughput         int
 	HotDataPercentage       int64
 	HotSpotAccessPercentage int
 	Views                   []string
@@ -42,5 +44,7 @@ type Workload interface {
 
 	DoBatch(database databases.Database, state *State, seq chan string)
 
-	RunWorkload(database databases.Database, state *State, wg *sync.WaitGroup)
+	RunCRUDWorkload(database databases.Database, state *State, wg *sync.WaitGroup)
+
+	RunQueryWorkload(database databases.Database, state *State, wg *sync.WaitGroup)
 }

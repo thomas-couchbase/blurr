@@ -88,7 +88,7 @@ func (state *State) MeasureLatency(database databases.Database,
 			latency := float64(t1.Sub(t0)/time.Microsecond) / 1000
 			state.Latency["Delete"] = append(state.Latency["Delete"], latency)
 		}
-		if config.QueryPercentage > 0 {
+		if config.QueryWorkers > 0 {
 			state.Operations++
 			key := workload.GenerateExistingKey(state.Records)
 			args := workload.GenerateQueryArgs(key)

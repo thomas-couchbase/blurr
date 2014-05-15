@@ -31,5 +31,6 @@ func ReadConfig() (config Config) {
 	}
 
 	config.Workload.Throughput /= config.Workload.Workers
+	config.Workload.QueryThroughput /= config.Workload.QueryWorkers
 	return
 }
