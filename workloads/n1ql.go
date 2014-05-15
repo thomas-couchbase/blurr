@@ -216,120 +216,120 @@ func (w *N1QL) GenerateValue(key string, size int) map[string]interface{} {
 
 func (w *N1QL) GenerateQueryArgs(key string) []interface{} {
 	alphabet := build_alphabet(key)
-	view := w.Config.Views[rand.Intn(len(w.Config.Views))]
+	index := w.Config.Indexes[rand.Intn(len(w.Config.Indexes))]
 
-	switch view {
+	switch index {
 	case "name_and_street_by_city":
 		return []interface{}{
-			view,
+			index,
 			build_city(alphabet),
 		}
 	case "name_and_email_by_county":
 		return []interface{}{
-			view,
+			index,
 			build_county(alphabet),
 		}
 	case "achievements_by_realm":
 		return []interface{}{
-			view,
+			index,
 			build_realm(alphabet),
 		}
 	case "name_by_coins":
 		return []interface{}{
-			view,
+			index,
 			build_coins(alphabet),
 		}
 	case "email_by_achievement_and_category":
 		return []interface{}{
-			view,
+			index,
 			build_achievements(alphabet),
 			build_category(alphabet),
 		}
 	case "street_by_year_and_coins":
 		return []interface{}{
-			view,
+			index,
 			build_year(alphabet),
 			build_coins(alphabet),
 		}
 	case "coins_stats_by_state_and_year":
 		return []interface{}{
-			view,
+			index,
 			build_state(alphabet),
 			build_year(alphabet),
 		}
 	case "coins_stats_by_gmtime_and_year":
 		return []interface{}{
-			view,
+			index,
 			build_gmtime(alphabet),
 			build_year(alphabet),
 		}
 	case "coins_stats_by_full_state_and_year":
 		return []interface{}{
-			view,
+			index,
 			build_full_state(alphabet),
 			build_year(alphabet),
 		}
 	case "name_and_email_and_street_and_achievements_and_coins_by_city":
 		return []interface{}{
-			view,
+			index,
 			build_city(alphabet),
 		}
 	case "street_and_name_and_email_and_achievement_and_coins_by_county":
 		return []interface{}{
-			view,
+			index,
 			build_county(alphabet),
 		}
 	case "category_name_and_email_and_street_and_gmtime_and_year_by_country":
 		return []interface{}{
-			view,
+			index,
 			build_country(alphabet),
 		}
 	case "calc_by_city":
 		return []interface{}{
-			view,
+			index,
 			build_city(alphabet),
 		}
 	case "calc_by_county":
 		return []interface{}{
-			view,
+			index,
 			build_county(alphabet),
 		}
 	case "calc_by_realm":
 		return []interface{}{
-			view,
+			index,
 			build_realm(alphabet),
 		}
 	case "body_by_city":
 		return []interface{}{
-			view,
+			index,
 			build_city(alphabet),
 		}
 	case "body_by_realm":
 		return []interface{}{
-			view,
+			index,
 			build_realm(alphabet),
 		}
 	case "body_by_country":
 		return []interface{}{
-			view,
+			index,
 			build_country(alphabet),
 		}
 	case "distinct_states":
 		return []interface{}{
-			view,
+			index,
 			"state.f",
 		}
 	case "distinct_full_states":
 		return []interface{}{
-			view,
+			index,
 			"full_state.f",
 		}
 	case "distinct_years":
 		return []interface{}{
-			view,
+			index,
 			"year",
 		}
 	}
-	log.Fatalf("Uknown view: %s", view)
+	log.Fatalf("Uknown index: %s", index)
 	return nil
 }

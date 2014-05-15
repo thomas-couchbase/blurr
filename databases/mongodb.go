@@ -77,7 +77,7 @@ func (mongo *MongoDB) Delete(key string) error {
 }
 
 func (mongo *MongoDB) Query(key string, args []interface{}) error {
-	view := args[0].(string)
+	index := args[0].(string)
 
 	session := mongo.Session.New()
 	defer session.Close()
@@ -86,7 +86,7 @@ func (mongo *MongoDB) Query(key string, args []interface{}) error {
 	var q, s bson.M
 	var d string
 	var pipe *mgo.Pipe
-	switch view {
+	switch index {
 	case "name_and_street_by_city":
 		q = bson.M{
 			"city.f.f": args[1],

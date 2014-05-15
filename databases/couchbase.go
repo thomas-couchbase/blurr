@@ -48,10 +48,10 @@ func (cb *Couchbase) Delete(key string) error {
 var DDOC_NAME = "ddoc"
 
 func (cb *Couchbase) Query(key string, args []interface{}) error {
-	view := args[0].(string)
+	index := args[0].(string)
 	params := map[string]interface{}{"limit": 20}
 
-	switch view {
+	switch index {
 	case "name_and_street_by_city":
 		params["key"] = args[1]
 	case "name_and_email_by_county":
@@ -95,6 +95,6 @@ func (cb *Couchbase) Query(key string, args []interface{}) error {
 	case "body_by_country":
 		params["key"] = args[1]
 	}
-	_, err := cb.Bucket.View(DDOC_NAME, view, params)
+	_, err := cb.Bucket.View(DDOC_NAME, index, params)
 	return err
 }

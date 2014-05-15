@@ -70,10 +70,10 @@ func (t *Tuq) Delete(key string) error {
 }
 
 func (t *Tuq) Query(key string, args []interface{}) error {
-	view := args[0].(string)
+	index := args[0].(string)
 
 	var q string
-	switch view {
+	switch index {
 	case "name_and_street_by_city":
 		query := `
 			SELECT name.f.f.f AS _name, street.f.f AS _street

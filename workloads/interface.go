@@ -23,7 +23,7 @@ type Config struct {
 	HotDataPercentage       int64
 	HotSpotAccessPercentage int
 	RunTime                 int
-	Views                   []string
+	Indexes                 []string
 }
 
 type Workload interface {
