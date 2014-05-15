@@ -30,6 +30,6 @@ func ReadConfig() (config Config) {
 		log.Fatal(err)
 	}
 
-	config.Workload.TargetThroughput /= config.Workload.Workers
+	config.Workload.Throughput /= config.Workload.Workers
 	return
 }

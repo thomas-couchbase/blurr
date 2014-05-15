@@ -45,7 +45,7 @@ blurr uses JSON format for configuration. There are two groups of parameters, ex
             "Operations": 100000,
             "ValueSize": 2048,
             "Workers": 16,
-            "TargetThroughput": 2000,
+            "Throughput": 2000,
             "HotDataPercentage": 20,
             "HotSpotAccessPercentage": 95
         }
@@ -61,6 +61,6 @@ blurr uses JSON format for configuration. There are two groups of parameters, ex
 * Workload.Operations - total number of operations to perform, defines benchmark run time
 * Workload.ValueSize - size of synthetic values
 * Workload.Workers - number of concurrent workers (threads, clients, and etc.)
-* Workload.TargetThroughput - enable limited throughput if provided
+* Workload.Throughput - enable limited throughput if provided
 * Workload.HotDataPercentage - percentage of hot records in dataset (HotSpot workload)
 * Workload.HotSpotAccessPercentage - percentage of operations that hit hot subset (HotSpot workload)

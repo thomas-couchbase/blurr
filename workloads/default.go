@@ -148,7 +148,7 @@ func (w *Default) RunWorkload(database databases.Database,
 	rand.Seed(time.Now().UnixNano())
 	seq := w.PrepareSeq(w.Config.Operations)
 
-	targetBatchTimeF := float64(BatchSize) / float64(w.Config.TargetThroughput)
+	targetBatchTimeF := float64(BatchSize) / float64(w.Config.Throughput)
 
 	for state.Operations < w.Config.Operations {
 		t0 := time.Now()

@@ -17,7 +17,7 @@ type Config struct {
 	Operations              int64
 	ValueSize               int
 	Workers                 int
-	TargetThroughput        int
+	Throughput              int
 	HotDataPercentage       int64
 	HotSpotAccessPercentage int
 	Views                   []string
