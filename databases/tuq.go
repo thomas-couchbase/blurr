@@ -5,17 +5,19 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 )
 
 type RestClient struct {
-	client  *http.Client
-	baseURI string
+	client *http.Client
+	URIs   []string
 }
 
 func (c RestClient) Do(q string) error {
 	data := bytes.NewReader([]byte(q))
-	req, err := http.NewRequest("POST", c.baseURI, data)
+	uri := c.URIs[rand.Intn(len(c.URIs))]
+	req, err := http.NewRequest("POST", uri, data)
 	req.Header.Set("Content-Type", "text/plain")
 
 	resp, err := c.client.Do(req)
@@ -42,9 +44,13 @@ type Tuq struct {
 const MaxIdleConnsPerHost = 1000
 
 func (t *Tuq) Init(config Config) {
-	baseURI := fmt.Sprintf("%squery", config.Addresses[0])
+	URIs := []string{}
+	for _, address := range config.Addresses {
+		URIs = append(URIs, fmt.Sprintf("%squery", address))
+	}
+
 	tr := &http.Transport{MaxIdleConnsPerHost: MaxIdleConnsPerHost}
-	t.client = &RestClient{&http.Client{Transport: tr}, baseURI}
+	t.client = &RestClient{&http.Client{Transport: tr}, URIs}
 	t.bucket = config.Table
 
 	t.cb = Couchbase{}
