@@ -45,14 +45,21 @@ blurr uses JSON format for configuration. There are two groups of parameters, ex
             "Operations": 100000,
             "ValueSize": 2048,
             "Workers": 16,
-            "QueryWorkers": 10,
             "Throughput": 2000,
-            "QueryThroughput": 100,
             "HotDataPercentage": 20,
             "HotSpotAccessPercentage": 95,
-            "RunTime": 3600
+            "RunTime": 3600,
+            "QueryWorkers": 10,
+            "QueryThroughput": 100,
+            "Indexes": [
+        		"coins_stats_by_state_and_year",
+        		"street_by_year_and_coins",
+        		"distinct_years"
+        	]
         }
     }
+
+Basic parameters:
 
 * Database.Driver - database driver for benchmark (MongoDB, Couchbase, Tuq or Cassandra)
 * Database.Name - name of database
@@ -64,9 +71,13 @@ blurr uses JSON format for configuration. There are two groups of parameters, ex
 * Workload.Operations - total number of operations to perform, defines benchmark run time
 * Workload.ValueSize - size of synthetic values
 * Workload.Workers - number of concurrent CRUD workers (threads, clients, and etc.)
-* Workload.QueryWorkers - number of concurrent query workers
 * Workload.Throughput - enable limited throughput of CRUD ops if provided
-* Workload.QueryThroughput - enable limited throughput of queries if provided
 * Workload.HotDataPercentage - percentage of hot records in dataset (HotSpot workload)
 * Workload.HotSpotAccessPercentage - percentage of operations that hit hot subset (HotSpot workload)
 * Workload.RunTime - optional benchmark run time in seconds
+
+Additional parameters for secondary indexes:
+
+* Workload.QueryWorkers - number of concurrent query workers
+* Workload.QueryThroughput - enable limited throughput of queries if provided
+* Workload.Indexes - [optional] list of secondary indexes
