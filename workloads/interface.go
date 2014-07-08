@@ -3,7 +3,7 @@ package workloads
 import (
 	"sync"
 
-	"github.com/pavel-paulau/blurr/databases"
+	"github.com/couchbaselabs/blurr/databases"
 )
 
 type Config struct {

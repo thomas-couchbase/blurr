@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pavel-paulau/blurr/databases"
+	"github.com/couchbaselabs/blurr/databases"
 )
 
 type State struct {

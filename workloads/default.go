@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pavel-paulau/blurr/databases"
+	"github.com/couchbaselabs/blurr/databases"
 )
 
 const BatchSize int = 100

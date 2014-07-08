@@ -12,7 +12,7 @@ Prerequisites
 Installation
 ------------
 
-    go get github.com/pavel-paulau/blurr
+    go get github.com/couchbaselabs/blurr
 
 Usage
 -----

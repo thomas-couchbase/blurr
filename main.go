@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pavel-paulau/blurr/databases"
-	"github.com/pavel-paulau/blurr/workloads"
+	"github.com/couchbaselabs/blurr/databases"
+	"github.com/couchbaselabs/blurr/workloads"
 )
 
 var config Config
