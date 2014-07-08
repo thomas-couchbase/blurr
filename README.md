@@ -65,7 +65,7 @@ Basic parameters:
 * Database.Name - name of database
 * Database.Table - name of table, collection, bucket and etc.
 * Database.Addresses - list of host:port string to use in connection pool
-* Workload.Type - workload type (Default or HotSpot)
+* Workload.Type - workload type (Default, HotSpot or N1QL)
 * Workload.(Create|Read|Update|Delete)Percentage - CRUD operations ratio, sum must be equal 100
 * Workload.Records - number of existing records(rows, documents) in database before benchmark
 * Workload.Operations - total number of operations to perform, defines benchmark run time
@@ -76,7 +76,7 @@ Basic parameters:
 * Workload.HotSpotAccessPercentage - percentage of operations that hit hot subset (HotSpot workload)
 * Workload.RunTime - optional benchmark run time in seconds
 
-Additional parameters for secondary indexes:
+Additional parameters for [secondary indexes](https://github.com/couchbaselabs/blurr/wiki/Queries-on-secondary-indexes):
 
 * Workload.QueryWorkers - number of concurrent query workers
 * Workload.QueryThroughput - enable limited throughput of queries if provided
