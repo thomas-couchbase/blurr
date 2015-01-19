@@ -7,8 +7,8 @@ import (
 	"io/ioutil"
 	"log"
 
-	"github.com/couchbaselabs/blurr/databases"
-	"github.com/couchbaselabs/blurr/workloads"
+	"github.com/thomas-couchbase/blurr/databases"
+	"github.com/thomas-couchbase/blurr/workloads"
 )
 
 type Config struct {
