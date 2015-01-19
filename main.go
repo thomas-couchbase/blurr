@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/couchbaselabs/blurr/databases"
-	"github.com/couchbaselabs/blurr/workloads"
+	"github.com/thomas-couchbase/blurr/databases"
+	"github.com/thomas-couchbase/blurr/workloads"
 )
 
 var config Config
@@ -22,10 +22,14 @@ func init() {
 	switch config.Database.Driver {
 	case "MongoDB":
 		database = &databases.MongoDB{}
+	case "MongoDB_cluster":
+		database = &databases.MongoDBCluster{}
 	case "Couchbase":
 		database = &databases.Couchbase{}
 	case "Cassandra":
 		database = &databases.Cassandra{}
+	case "Cassandra_cluster":
+		database = &databases.Cassandra_cluster{}
 	case "Tuq":
 		database = &databases.Tuq{}
 	default:
